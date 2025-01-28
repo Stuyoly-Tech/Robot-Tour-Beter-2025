@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "TMC2209-LA-T")(type "KiCad")(uri "/home/kellen/Documents/Robot-Tour-Beter-2025/Libraries/TMC_2209-LA-T/TMC2209-LA-T.kicad_sym")(options "")(descr ""))
+)
