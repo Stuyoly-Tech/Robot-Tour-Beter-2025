@@ -4397,6 +4397,12 @@
 		(uuid "31dd7137-4407-4291-bca1-15c883838f3d")
 	)
 	(junction
+		(at 87.63 22.86)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "367eaa8a-0845-4608-8296-3d88245bc338")
+	)
+	(junction
 		(at 261.62 123.19)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6654,7 +6660,7 @@
 	)
 	(wire
 		(pts
-			(xy 87.63 22.86) (xy 104.14 22.86)
+			(xy 83.82 22.86) (xy 87.63 22.86)
 		)
 		(stroke
 			(width 0)
@@ -7194,6 +7200,16 @@
 	)
 	(wire
 		(pts
+			(xy 87.63 22.86) (xy 87.63 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2c915b0-f677-4e71-a4ac-85dc5006cf97")
+	)
+	(wire
+		(pts
 			(xy 66.04 154.94) (xy 73.66 154.94)
 		)
 		(stroke
@@ -7704,6 +7720,16 @@
 	)
 	(wire
 		(pts
+			(xy 87.63 22.86) (xy 104.14 22.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "da41c9bc-3563-4b93-86a6-75137062ec31")
+	)
+	(wire
+		(pts
 			(xy 33.02 100.33) (xy 33.02 102.87)
 		)
 		(stroke
@@ -7981,16 +8007,6 @@
 			(type default)
 		)
 		(uuid "f8a6bee6-d1a1-43db-941c-33b6311ca55c")
-	)
-	(wire
-		(pts
-			(xy 87.63 22.86) (xy 87.63 25.4)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f8f0df5b-00dc-4d43-a859-4d10a473c971")
 	)
 	(wire
 		(pts
@@ -8308,6 +8324,16 @@
 			(justify left bottom)
 		)
 		(uuid "0c25a8d4-953a-4272-bd69-a401acee1e32")
+	)
+	(label "BAT"
+		(at 83.82 22.86 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "12c62a20-49d6-4c23-90b5-9988fe94ec01")
 	)
 	(label "BTN9"
 		(at 66.04 172.72 0)
@@ -9917,7 +9943,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "TerminalBlock_4Ucon:TerminalBlock_4Ucon_1x04_P3.50mm_Horizontal"
+		(property "Footprint" "TerminalBlock_MetzConnect:TerminalBlock_MetzConnect_Type059_RT06304HBWC_1x04_P3.50mm_Horizontal"
 			(at 275.59 39.37 0)
 			(effects
 				(font
@@ -11564,7 +11590,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "TerminalBlock_4Ucon:TerminalBlock_4Ucon_1x04_P3.50mm_Horizontal"
+		(property "Footprint" "TerminalBlock_MetzConnect:TerminalBlock_MetzConnect_Type059_RT06304HBWC_1x04_P3.50mm_Horizontal"
 			(at 203.2 39.37 0)
 			(effects
 				(font
