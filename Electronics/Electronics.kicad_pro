@@ -48,7 +48,7 @@
         "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.5
+          "min_clearance": 0.0
         }
       },
       "diff_pair_dimensions": [
@@ -58,18 +58,7 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [
-        "hole_clearance|178920000|123830000|b11a9abc-b1ee-4631-9775-999fbf08c175|bcb681fc-3382-475e-8029-ba7017c52087",
-        "hole_clearance|178920000|123830000|d3174a72-3ec6-4335-b070-1336a3935a76|bcb681fc-3382-475e-8029-ba7017c52087",
-        "hole_clearance|179120000|123830000|3e0cf17d-2ebd-462a-b072-53cd675e5301|bcb681fc-3382-475e-8029-ba7017c52087",
-        "hole_clearance|179120000|123830000|8fd6458a-74b9-4005-90b1-bf6041b34cd5|bcb681fc-3382-475e-8029-ba7017c52087",
-        "hole_clearance|184520000|123830000|0c3ce505-25db-45eb-9e54-d90433c04255|e6b28eea-940f-4dce-ad3f-179521f7040e",
-        "hole_clearance|184520000|123830000|9ddf1f7f-f96b-4d0b-aff4-1e1ad6175f7e|e6b28eea-940f-4dce-ad3f-179521f7040e",
-        "hole_clearance|184720000|123830000|828d0745-7023-4ca2-a8b1-2921b7396176|e6b28eea-940f-4dce-ad3f-179521f7040e",
-        "hole_clearance|184720000|123830000|dda7527b-92cb-4310-8a1c-8fb75bd8850d|e6b28eea-940f-4dce-ad3f-179521f7040e",
-        "silk_edge_clearance|177350000|130000000|9c579e55-6de4-4047-bfe8-c0f626dcf7e0|d3694db3-76c3-452d-8d16-913ca7b35d86",
-        "silk_edge_clearance|186290000|130000000|9c579e55-6de4-4047-bfe8-c0f626dcf7e0|ff0d927b-5948-4ba0-aa3b-658b836dfb4b"
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
@@ -497,10 +486,10 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "../Gerbers/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "Electronics.step",
       "svg": "",
       "vrml": ""
     },
