@@ -6549,12 +6549,6 @@
 		(uuid "e764ecea-1850-4d0b-814e-921b18caa758")
 	)
 	(junction
-		(at 17.78 81.28)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "e909d1ce-fe14-4264-8299-2cad36ca6e4b")
-	)
-	(junction
 		(at 105.41 157.48)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -7333,6 +7327,16 @@
 			(type default)
 		)
 		(uuid "2b135699-4e3e-4599-9a6a-19af13998658")
+	)
+	(wire
+		(pts
+			(xy 43.18 78.74) (xy 43.18 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2bcff5f7-9237-4c2f-a865-29ba8ae3d011")
 	)
 	(wire
 		(pts
@@ -8323,16 +8327,6 @@
 			(type default)
 		)
 		(uuid "77e5d994-415f-47f3-9fc7-8b9768bb58a8")
-	)
-	(wire
-		(pts
-			(xy 17.78 80.01) (xy 17.78 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "78023d4d-6144-4713-8d53-4230839edb46")
 	)
 	(wire
 		(pts
@@ -12251,71 +12245,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:VCC")
-		(at 17.78 80.01 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "3798d60e-4df4-4af2-857c-ea5c7e083821")
-		(property "Reference" "#PWR027"
-			(at 17.78 83.82 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "VBAT"
-			(at 17.78 76.454 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 17.78 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 17.78 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"VCC\""
-			(at 17.78 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "b92bfc45-6c26-4b62-9435-47b37bdf3834")
-		)
-		(instances
-			(project ""
-				(path "/fb299ee1-36f2-498d-9da8-1c8d846ea71b"
-					(reference "#PWR027")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:C")
 		(at 140.97 146.05 0)
 		(unit 1)
@@ -13469,6 +13398,71 @@
 			(project "Electronics V2"
 				(path "/fb299ee1-36f2-498d-9da8-1c8d846ea71b"
 					(reference "C17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VCC")
+		(at 43.18 78.74 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "56dd3e66-d82a-4a66-b445-cc6f76d87b07")
+		(property "Reference" "#PWR036"
+			(at 43.18 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VBAT"
+			(at 43.18 75.184 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 43.18 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 43.18 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"VCC\""
+			(at 43.18 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d54daee8-7295-4ad8-8445-374caf7f58b3")
+		)
+		(instances
+			(project "Electronics V2"
+				(path "/fb299ee1-36f2-498d-9da8-1c8d846ea71b"
+					(reference "#PWR036")
 					(unit 1)
 				)
 			)
