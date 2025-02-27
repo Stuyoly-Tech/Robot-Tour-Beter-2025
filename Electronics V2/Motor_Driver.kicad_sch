@@ -2739,7 +2739,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_DIP_SPSTx02_Slide_6.7x6.64mm_W6.73mm_P2.54mm_LowProfile_JPin"
 			(at 134.62 96.52 0)
 			(effects
 				(font
@@ -3247,7 +3247,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 203.2 111.76 0)
 			(effects
 				(font
