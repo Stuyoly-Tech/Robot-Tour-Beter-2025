@@ -6844,6 +6844,10 @@
 		(uuid "03b13fc2-f991-407e-839f-42b280f8a565")
 	)
 	(no_connect
+		(at 181.61 50.8)
+		(uuid "0a11bef0-1477-4927-a660-da6b0237b9ac")
+	)
+	(no_connect
 		(at 52.07 166.37)
 		(uuid "0dbfeb10-82ee-416f-8a4c-b1295239d20d")
 	)
@@ -6858,6 +6862,10 @@
 	(no_connect
 		(at 119.38 166.37)
 		(uuid "1a55f62f-f11c-4541-88cc-210a0c18a449")
+	)
+	(no_connect
+		(at 181.61 48.26)
+		(uuid "2e1795f5-5cd2-4e71-bac1-da4127208ae4")
 	)
 	(no_connect
 		(at 26.67 168.91)
@@ -9181,16 +9189,6 @@
 	)
 	(wire
 		(pts
-			(xy 181.61 48.26) (xy 201.93 48.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ab3e465b-0d10-44b5-b9af-31a18717d178")
-	)
-	(wire
-		(pts
 			(xy 218.44 36.83) (xy 228.6 36.83)
 		)
 		(stroke
@@ -9698,16 +9696,6 @@
 			(type default)
 		)
 		(uuid "cd2b8280-f3a5-42ca-a54d-46a722e12add")
-	)
-	(wire
-		(pts
-			(xy 181.61 50.8) (xy 201.93 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cdea0e67-c8b4-428a-aade-e8352ce47073")
 	)
 	(wire
 		(pts
@@ -10751,16 +10739,6 @@
 		)
 		(uuid "28b210f0-9ca8-4693-b917-3fbbe9ac8aa7")
 	)
-	(label "MS1_AD1"
-		(at 201.93 48.26 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "2976ab62-ff2a-417a-9590-476d9767533b")
-	)
 	(label "MOSI"
 		(at 91.44 129.54 180)
 		(effects
@@ -10830,16 +10808,6 @@
 			(justify left bottom)
 		)
 		(uuid "42c9265b-49d4-4098-b12d-44b89abc6e83")
-	)
-	(label "MS1_AD0"
-		(at 201.93 50.8 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "43ce1ad8-2233-404f-9478-5fb46a552bc4")
 	)
 	(label "SCL"
 		(at 138.43 173.99 0)
