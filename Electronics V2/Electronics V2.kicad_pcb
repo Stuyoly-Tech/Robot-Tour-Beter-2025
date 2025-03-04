@@ -1704,7 +1704,7 @@
 		(descr "Terminal Block Phoenix PT-1,5-2-3.5-H, 2 pins, pitch 3.5mm, size 7x7.6mm^2, drill diamater 1.2mm, pad diameter 2.4mm, see , script-generated using https://github.com/pointhi/kicad-footprint-generator/scripts/TerminalBlock_Phoenix")
 		(tags "THT Terminal Block Phoenix PT-1,5-2-3.5-H pitch 3.5mm size 7x7.6mm^2 drill 1.2mm pad 2.4mm")
 		(property "Reference" "J6"
-			(at 1.75 -4.16 360)
+			(at 1.75 -4.16 0)
 			(layer "F.SilkS")
 			(uuid "380afd87-5686-4bd1-a582-d36c280cbc80")
 			(effects
@@ -1715,7 +1715,7 @@
 			)
 		)
 		(property "Value" "L1"
-			(at 1.75 5.56 360)
+			(at 1.75 5.56 0)
 			(layer "F.Fab")
 			(uuid "ef562f6b-bef4-40b1-9b74-79fbe81aff2d")
 			(effects
@@ -1726,7 +1726,7 @@
 			)
 		)
 		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "ffe50548-80da-44d7-a7ff-9283bcc56b51")
@@ -1738,7 +1738,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "c988150f-f723-45bb-bbef-0d3fd3b7736d")
@@ -1750,7 +1750,7 @@
 			)
 		)
 		(property "Description" "Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "2efbb1ac-f0b0-49aa-8c88-8254379fc92a")
@@ -2125,7 +2125,7 @@
 			(uuid "fc1fdb11-8a35-453c-9855-480f4660a327")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.75 2.4 360)
+			(at 1.75 2.4 0)
 			(layer "F.Fab")
 			(uuid "9b0c1037-ef24-41c2-b2dd-e2c395f449f9")
 			(effects
@@ -5471,7 +5471,7 @@
 		(descr "Terminal Block Phoenix PT-1,5-2-3.5-H, 2 pins, pitch 3.5mm, size 7x7.6mm^2, drill diamater 1.2mm, pad diameter 2.4mm, see , script-generated using https://github.com/pointhi/kicad-footprint-generator/scripts/TerminalBlock_Phoenix")
 		(tags "THT Terminal Block Phoenix PT-1,5-2-3.5-H pitch 3.5mm size 7x7.6mm^2 drill 1.2mm pad 2.4mm")
 		(property "Reference" "J7"
-			(at 1.75 -4.16 360)
+			(at 1.75 -4.16 0)
 			(layer "F.SilkS")
 			(uuid "a02fc861-f2e9-48b7-a24a-1c672f05a9fd")
 			(effects
@@ -5482,7 +5482,7 @@
 			)
 		)
 		(property "Value" "L2"
-			(at 1.75 5.56 360)
+			(at 1.75 5.56 0)
 			(layer "F.Fab")
 			(uuid "30a2f36d-17b6-446a-b55e-53ce599cbd40")
 			(effects
@@ -5493,7 +5493,7 @@
 			)
 		)
 		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "d45c2f5f-5830-46a1-89d8-d150766acff6")
@@ -5505,7 +5505,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "e7f9b838-84a5-4a63-8d81-1a4e3d1685be")
@@ -5517,7 +5517,7 @@
 			)
 		)
 		(property "Description" "Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "3ad8d596-a7cf-4270-a6e1-c025a59825a0")
@@ -5892,7 +5892,7 @@
 			(uuid "ba227f84-2d9b-40e1-856a-dd1d006b72b0")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 1.75 2.4 360)
+			(at 1.75 2.4 0)
 			(layer "F.Fab")
 			(uuid "f85f47b8-7dc9-4e6b-872e-5675512c088f")
 			(effects
@@ -13893,7 +13893,7 @@
 		(descr "Terminal Block Phoenix PT-1,5-4-3.5-H, 4 pins, pitch 3.5mm, size 14x7.6mm^2, drill diamater 1.2mm, pad diameter 2.4mm, see , script-generated using https://github.com/pointhi/kicad-footprint-generator/scripts/TerminalBlock_Phoenix")
 		(tags "THT Terminal Block Phoenix PT-1,5-4-3.5-H pitch 3.5mm size 14x7.6mm^2 drill 1.2mm pad 2.4mm")
 		(property "Reference" "J1"
-			(at 5.25 -4.16 360)
+			(at 5.25 -4.16 0)
 			(layer "F.SilkS")
 			(uuid "0b1d26d4-8b2e-4124-9c05-3a5993fdedb5")
 			(effects
@@ -13904,7 +13904,7 @@
 			)
 		)
 		(property "Value" "MOT_L"
-			(at 5.25 5.56 360)
+			(at 5.25 5.56 0)
 			(layer "F.Fab")
 			(uuid "7d221c94-6dcf-4296-8c15-6c5e0911cafd")
 			(effects
@@ -13915,7 +13915,7 @@
 			)
 		)
 		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "412fc6bc-2dd8-4129-90b7-53b4dd0d9b5b")
@@ -13927,7 +13927,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "a1634246-107c-43e4-9c41-dee70f716aa3")
@@ -13939,7 +13939,7 @@
 			)
 		)
 		(property "Description" "Generic screw terminal, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "8f46157a-1192-4400-9310-daceaf4af408")
@@ -14478,7 +14478,7 @@
 			(uuid "4a108b25-f69e-455b-bb1d-22f6f42d05f5")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 5.25 2.4 360)
+			(at 5.25 2.4 0)
 			(layer "F.Fab")
 			(uuid "48345adf-55a7-401c-a640-8de7ed65695e")
 			(effects
@@ -17881,7 +17881,7 @@
 			)
 		)
 		(property "Footprint" "RF_Module:ESP32-S3-WROOM-1"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "8c03e20e-957f-454c-99d7-422a645b6915")
@@ -17893,7 +17893,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "7808c695-9ef9-4e2e-9e4f-0db833f67f46")
@@ -17905,7 +17905,7 @@
 			)
 		)
 		(property "Description" "RF Module, ESP32-S3 SoC, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 3.3V, onboard antenna, SMD"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "75163fc5-7222-4e5a-909b-493ff53209ef")
@@ -18134,7 +18134,7 @@
 			(uuid "d1ce56b9-f39d-42ff-a7c1-701711ff7f99")
 		)
 		(fp_text user "Antenna"
-			(at -0.05 -9.44 360)
+			(at -0.05 -9.44 0)
 			(layer "Cmts.User")
 			(uuid "62eb1878-d626-4559-aed8-d102eb9eaae3")
 			(effects
@@ -18145,7 +18145,7 @@
 			)
 		)
 		(fp_text user "KEEP-OUT ZONE"
-			(at 0 -18.92 360)
+			(at 0 -18.92 0)
 			(layer "Cmts.User")
 			(uuid "de9eaf8a-f0d3-4dc2-a411-9b9bf4da1e4b")
 			(effects
@@ -20243,7 +20243,7 @@
 		(descr "Bourns rotary encoder, PEC12R, with switch, with bushing, vertical shaft, 17.5mm shaft, https://www.bourns.com/docs/product-datasheets/pec12r.pdf")
 		(tags "rotary encoder")
 		(property "Reference" "SW8"
-			(at 3 -4.75 360)
+			(at 3 -4.75 0)
 			(layer "F.SilkS")
 			(uuid "0ce9c0d3-8740-4ea1-93b8-f448c67f69e7")
 			(effects
@@ -20254,7 +20254,7 @@
 			)
 		)
 		(property "Value" "INCR_0"
-			(at 7.5 11 360)
+			(at 7.5 11 0)
 			(layer "F.Fab")
 			(uuid "a47bd7e8-bed9-448a-a545-96fabcc21859")
 			(effects
@@ -20265,7 +20265,7 @@
 			)
 		)
 		(property "Footprint" "Rotary_Encoder:RotaryEncoder_Bourns_Vertical_PEC12R-3x17F-Sxxxx"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "e6367554-c0b9-4715-b216-5f50e3efb985")
@@ -20277,7 +20277,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "98115684-e950-47af-a417-05ec8fa8cfae")
@@ -20289,7 +20289,7 @@
 			)
 		)
 		(property "Description" "Rotary encoder, dual channel, incremental quadrate outputs, with switch"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "738d3b6d-b1b3-4afe-a21f-b4c48377d63f")
@@ -20728,7 +20728,7 @@
 			(uuid "c2e7e64a-91b6-4d62-a915-bc2bbe573886")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 7.6 2.5 360)
+			(at 7.6 2.5 0)
 			(layer "F.Fab")
 			(uuid "4f124039-7aad-4d40-8043-df7f9bffcb9d")
 			(effects
@@ -21249,7 +21249,7 @@
 		(descr "Terminal Block Phoenix PT-1,5-4-3.5-H, 4 pins, pitch 3.5mm, size 14x7.6mm^2, drill diamater 1.2mm, pad diameter 2.4mm, see , script-generated using https://github.com/pointhi/kicad-footprint-generator/scripts/TerminalBlock_Phoenix")
 		(tags "THT Terminal Block Phoenix PT-1,5-4-3.5-H pitch 3.5mm size 14x7.6mm^2 drill 1.2mm pad 2.4mm")
 		(property "Reference" "J2"
-			(at 5.25 -4.16 360)
+			(at 5.25 -4.16 0)
 			(layer "F.SilkS")
 			(uuid "1b114a42-953f-4bfa-8aff-dc9ae43853e3")
 			(effects
@@ -21260,7 +21260,7 @@
 			)
 		)
 		(property "Value" "MOT_R"
-			(at 5.25 5.56 360)
+			(at 5.25 5.56 0)
 			(layer "F.Fab")
 			(uuid "80d4cabe-48da-4272-8a21-99706cfef1d2")
 			(effects
@@ -21271,7 +21271,7 @@
 			)
 		)
 		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-4-3.5-H_1x04_P3.50mm_Horizontal"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "aec3c28f-810d-4345-866b-fb664d0d8b48")
@@ -21283,7 +21283,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "42af958d-7814-44a9-b3ae-55080d4b4bc2")
@@ -21295,7 +21295,7 @@
 			)
 		)
 		(property "Description" "Generic screw terminal, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "6362c25a-d90f-43d3-af3a-8d40a4787487")
@@ -21834,7 +21834,7 @@
 			(uuid "7a04d78f-5b49-42ce-9ded-811160443761")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 5.25 2.4 360)
+			(at 5.25 2.4 0)
 			(layer "F.Fab")
 			(uuid "272c4cd0-5673-4cb8-9bca-faad21d080d9")
 			(effects
@@ -23043,7 +23043,7 @@
 			(uuid "cd7ffbda-c945-4ec7-9c5d-76a45a4c0b13")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 3.81 360)
+			(at 0 3.81 0)
 			(layer "F.Fab")
 			(uuid "ad1f1417-7590-43c9-92ce-fbcbd24d74c8")
 			(effects
