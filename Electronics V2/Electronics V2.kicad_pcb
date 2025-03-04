@@ -26998,14 +26998,6 @@
 		(uuid "fbed01af-0faa-4a0b-91a6-bb3e67fd2011")
 	)
 	(segment
-		(start 113.2 93.5)
-		(end 112.7 93.5)
-		(width 0.25)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "3c9c820b-3010-4ae3-a352-10c9f50b4ddd")
-	)
-	(segment
 		(start 194.875 84.9)
 		(end 195.3 84.9)
 		(width 0.25)
