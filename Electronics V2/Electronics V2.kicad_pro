@@ -48,7 +48,7 @@
         "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.2
+          "min_clearance": 0.0
         }
       },
       "diff_pair_dimensions": [
@@ -58,7 +58,28 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "drill_out_of_range|165300000|121140000|943eaff3-8b68-4acb-aa11-a7bae01f9e0a|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|165300000|122540000|4e0ab81a-9437-4c75-9f66-f1414d56a045|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|166000000|120440000|b628bbf7-34ef-4efd-8b2e-6865eca1afc9|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|166000000|121840000|864b30e2-66bf-4af3-a905-d443e2c36faf|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|166000000|123240000|34585d3e-45bf-452f-8e05-73b3a83dea93|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|166700000|121140000|fcf33d84-f567-4610-971a-8dc39d1a917f|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|166700000|122540000|addffe10-2652-46d9-aa8f-84cf98b3d9d2|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|167400000|120440000|7a7e156d-c477-4a78-8ce9-e0f8a709aff4|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|167400000|121840000|5bdca09d-208b-4ed7-b71e-f491452eb095|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|167400000|123240000|828f9819-99b7-49e8-b07c-e5b3c0f38399|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|168100000|121140000|dba5c0c0-d01b-4660-85d2-51fbdb85e7af|00000000-0000-0000-0000-000000000000",
+        "drill_out_of_range|168100000|122540000|80c9be62-5cc6-44b9-a3aa-ee0ad6e01f63|00000000-0000-0000-0000-000000000000",
+        "hole_clearance|194120000|111140000|b8555626-256d-4c03-9086-584da2ddbe4c|6d26e0d4-78b7-454a-88dc-b02590da1b62",
+        "hole_clearance|194120000|111140000|b8555626-256d-4c03-9086-584da2ddbe4c|e6f1b9d9-e8d1-4d17-aa95-5f0f57c4c9f3",
+        "hole_clearance|194120000|117240000|89da52ab-6dfb-4500-8b90-8d062426d29e|36eab4f1-e6d7-4d43-b2c5-30012fb88e89",
+        "hole_clearance|194120000|117240000|89da52ab-6dfb-4500-8b90-8d062426d29e|8953412b-3b0e-472b-88e9-d5c48f1b3c08",
+        "starved_thermal|193695000|110990000|9d5dfdbc-a7b8-4ad6-8ed9-67a9ecacc174|6d26e0d4-78b7-454a-88dc-b02590da1b62|F.Cu",
+        "starved_thermal|193695000|110990000|9d5dfdbc-a7b8-4ad6-8ed9-67a9ecacc174|e6f1b9d9-e8d1-4d17-aa95-5f0f57c4c9f3|F.Cu",
+        "starved_thermal|193695000|117390000|9d5dfdbc-a7b8-4ad6-8ed9-67a9ecacc174|36eab4f1-e6d7-4d43-b2c5-30012fb88e89|F.Cu",
+        "starved_thermal|193695000|117390000|9d5dfdbc-a7b8-4ad6-8ed9-67a9ecacc174|8953412b-3b0e-472b-88e9-d5c48f1b3c08|F.Cu"
+      ],
       "meta": {
         "version": 2
       },
@@ -183,10 +204,7 @@
         0.2,
         0.25,
         0.3,
-        0.5,
-        0.7,
-        1.0,
-        2.0
+        0.7
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -487,7 +505,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "../GerbersV2/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "",

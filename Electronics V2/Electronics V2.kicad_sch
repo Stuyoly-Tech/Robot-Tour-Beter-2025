@@ -10761,7 +10761,7 @@
 		)
 		(uuid "15b2032a-8dc6-444f-9ff2-d09af79ee9be")
 	)
-	(label "DIR_L"
+	(label "STEP_R"
 		(at 140.97 63.5 0)
 		(effects
 			(font
@@ -10861,7 +10861,7 @@
 		)
 		(uuid "2f77b02d-94c1-4794-b282-35ac7dbe46f4")
 	)
-	(label "DIAG_R"
+	(label "DIAG_L"
 		(at 204.47 76.2 180)
 		(effects
 			(font
@@ -10871,7 +10871,7 @@
 		)
 		(uuid "2f9d3727-7a68-416d-a421-11de699f89e7")
 	)
-	(label "STEP_R"
+	(label "INDEX_R"
 		(at 140.97 66.04 0)
 		(effects
 			(font
@@ -10931,7 +10931,7 @@
 		)
 		(uuid "441c78ee-35e9-4ebf-b2bb-a9d61c49b7cd")
 	)
-	(label "STEP_L"
+	(label "DIR_R"
 		(at 140.97 60.96 0)
 		(effects
 			(font
@@ -11041,7 +11041,7 @@
 		)
 		(uuid "6b63bff6-8fbf-4c3c-9a74-543013458014")
 	)
-	(label "LASER"
+	(label "STEP_L"
 		(at 201.93 45.72 180)
 		(effects
 			(font
@@ -11051,7 +11051,7 @@
 		)
 		(uuid "6e95732f-1a87-4650-b5da-4e98dbe07c44")
 	)
-	(label "DIAG_L"
+	(label "LASER"
 		(at 204.47 66.04 180)
 		(effects
 			(font
@@ -11171,7 +11171,7 @@
 		)
 		(uuid "a55fcbb3-36f4-474f-98e2-c1e89c601f55")
 	)
-	(label "DIR_R"
+	(label "DIAG_R"
 		(at 140.97 68.58 0)
 		(effects
 			(font
@@ -11181,7 +11181,7 @@
 		)
 		(uuid "ba6a959c-ff0d-4cc4-94a6-0b1c6904c2cb")
 	)
-	(label "SPREAD"
+	(label "DIR_L"
 		(at 140.97 71.12 0)
 		(effects
 			(font
@@ -11361,7 +11361,7 @@
 		)
 		(uuid "fee503f0-42a9-4f9a-b378-51b124ee3fa0")
 	)
-	(label "INDEX_R"
+	(label "SPREAD"
 		(at 204.47 68.58 180)
 		(effects
 			(font
