@@ -1,10 +1,10 @@
 //Hardware connections
 
 //Buttons for input
-#define BTN_0 1
-#define BTN_1 2
-#define BTN_2 3
-#define BTN_3 4
+#define BTN_0 1 //INIT | x | x
+#define BTN_1 2 //RUN | TIME | INCREMENT
+#define BTN_2 3 //ADJUSTMENTS | XCHANGE | UP
+#define BTN_3 4 //LASERS | YCHANGE | DOWN
 
 //Rotary Encoder
 #define INCR_BTN 5
@@ -23,19 +23,19 @@
 
 #define STEPS_PER_REV 200*8//microsteps are controlled by dipswitch
 
-//Oled
-#define OLED_ADD 0x3C
-#define OLED_RST -1
+//Screen
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1 
+#define SCREEN_ADDRESS 0x3C
+#define SCREEN_WIRE &Wire
 
 //LEDS
-#define LED_0 6
+#define LED_0 6 //
 #define LED_1 7
 
 //SD Card
 #define SD_CS 41
-
-//oled
-#define I2C_ADDRESS 0x3C
 
 //BMI160 IMU
 #define IMU_ADDRESS 0x68
@@ -75,9 +75,7 @@
 #define SD_ERROR 6
 #define FILE_ERROR 7
 #define IMU_ERROR 8
-
-//ADJUSTMENT STATE DEFINITIONS
-#define MAIN 0
-#define ADJUST_X 1
-#define ADJUST_Y 2
-#define ADJUST_TIME 3
+#define ADJUST_MENU 9
+#define ADJUST_X 10
+#define ADJUST_Y 11
+#define ADJUST_TIME 12
