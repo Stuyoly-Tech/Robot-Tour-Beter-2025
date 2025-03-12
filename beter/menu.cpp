@@ -1,24 +1,50 @@
-#include "beter.ino"
 #include "CONFIG.h"
 #include <AccelStepper.h>
 #include "controller.h"
 #include "simplePursuit.h"
 #include "robot.h"
 
-uint8_t BTN_PINS[] = {BTN_0, BTN_1, BTN_2, BTN_3};
-bool BTN_PREV_STATES[] = {LOW, LOW, LOW, LOW};
+void displayScreen(int state) {
+  switch (state) {
+    case INIT:
 
-void displayScreen(int state){
+      break;
+    case IDLE:
 
-}
+      break;
+    case READY:
 
-bool BTN_STATE(uint8_t index) {
-  bool buttonstate = digitalRead(BTN_PINS[index]);
-  if (buttonstate != BTN_PREV_STATES[index]) {
-    BTN_PREV_STATES[index] = buttonstate;
-    if (buttonstate == HIGH) {
-      return true;
-    }
+      break;
+    case RUNNING:
+
+      break;
+    case END_RUN:
+
+      break;
+    case STOPPED:
+
+      break;
+    case SD_ERROR:
+
+      break;
+    case FILE_ERROR:
+
+      break;
+    case IMU_ERROR:
+
+      break;
+    case ADJUST_MENU:
+
+      break;
+    case ADJUST_X:
+
+      break;
+    case ADJUST_Y:
+
+      break;
+
+    case ADJUST_TIME:
+
+      break;
   }
-  return false;
 }

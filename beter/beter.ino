@@ -10,7 +10,6 @@
 
 #include <ArduinoEigenDense.h>
 using namespace Eigen;
-
 #include "SD.h"
 #include "FS.h"
 #include "SPI.h"
@@ -33,17 +32,14 @@ uint8_t GATE_SIZE;
 
 //Paramters
 double TARGET_TIME;
-double FINAL_OFFSET_Y;
-double FINAL_OFFSET_X;
+
 int PATH_MODE;
+
+uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
+bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
-
-//Button related
-uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3 };
-bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW };
-bool BTN_STATE(uint8_t index);
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
@@ -89,12 +85,14 @@ void setup() {
   pinMode(BTN_1, INPUT);
   pinMode(BTN_2, INPUT);
   pinMode(BTN_3, INPUT);
+  pinMode(INCR_BTN, INPUT);
 
   pinMode(STEP_ENABLE, OUTPUT);
   digitalWrite(STEP_ENABLE, HIGH);
 
   pinMode(LED_0, OUTPUT);
   pinMode(LED_1, OUTPUT);
+  pinMode(LASERS, OUTPUT);
 
   //oled init
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
@@ -135,125 +133,93 @@ void setup() {
   }
 }
 
-  void loop() {
-    switch (STATE) {
-      case INIT:
-        break;
-      case IDLE:
-        if (BTN_STATE(1)) {
-          Robot.init(PATH_MODE);
-          robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME, FINAL_OFFSET_Y, FINAL_OFFSET_X);
-          STATE = READY;
-          digitalWrite(STEP_ENABLE, LOW);
-          oled.clear();
-          oled.set1X();
-          oled.println("READY");
-          oled.print("target_t: ");
-          oled.println(TARGET_TIME);
-          oled.print("x_off: ");
-          oled.println(FINAL_OFFSET_X);
-          oled.print("y_off: ");
-          oled.print(FINAL_OFFSET_Y);
-        }
-        break;
-
-      case READY:
-        if (BTN_STATE(1)) {
-          Robot.init(PATH_MODE);
-          STATE = READY;
-          digitalWrite(STEP_ENABLE, LOW);
-          oled.clear();
-          oled.println("READY");
-          oled.print("target_t: ");
-          oled.println(TARGET_TIME);
-          oled.print("x_off: ");
-          oled.println(FINAL_OFFSET_X);
-          oled.print("y_off: ");
-          oled.print(FINAL_OFFSET_Y);
-        }
-        if (BTN_STATE(0)) {
-          Robot.startPath();
-          STATE = RUNNING;
-          digitalWrite(STEP_ENABLE, LOW);
-          oled.clear();
-          oled.set2X();
-          oled.println("RUNNING");
-          robotController.initTheta(PI / 2);
-        }
-        break;
-
-      case RUNNING:
-        Robot.update();
-        if (BTN_STATE(1)) {
-          STATE = STOPPED;
-          digitalWrite(STEP_ENABLE, HIGH);
-          oled.clear();
-          oled.set2X();
-          oled.println("STOPPED");
-          oled.set1X();
-          oled.print("current_t: ");
-          oled.print(Robot.stopPath());
-        }
-        if (Robot.getState() == 0) {
-          STATE = END_RUN;
-          oled.clear();
-          oled.set2X();
-          oled.println("RUN ENDED");
-          oled.set1X();
-          oled.print("elapsed_t: ");
-          oled.print(Robot.stopPath());
-        }
-        break;
-
-      case END_RUN:
-        if (BTN_STATE(0)) {
-          STATE = IDLE;
-          digitalWrite(STEP_ENABLE, HIGH);
-          oled.clear();
-          oled.set2X();
-          oled.println("IDLE");
-        }
-        break;
-
-      case STOPPED:
-        if (BTN_STATE(0)) {
-          STATE = IDLE;
-          oled.clear();
-          oled.set2X();
-          oled.println("IDLE");
-        }
-        break;
-
-      case MENU:
-        break;
-
-      case ERROR:
-        break;
-      case SD_ERROR:
-        break;
-      case FILE_ERROR:
-        break;
-      case IMU_ERROR:
-        break;
-      default:
+void loop() {
+  switch (STATE) {
+    case INIT:
+      break;
+    case IDLE:
+      if (BTN_STATE(1)) {
+        Robot.init(PATH_MODE);
+        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        STATE = READY;
+        digitalWrite(STEP_ENABLE, LOW);
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(2)) {
+        STATE = ADJUST_MENU;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        digitalWrite(LASERS, !digitalRead(LASERS));
+        digitalWrite(LED_0, !digitalRead(LED_0));
+      }
+      break;
+    case READY:
+      if (BTN_STATE(0)) {
+        Robot.startPath();
+        STATE = RUNNING;
+        displayScreen(STATE);
+        robotController.initTheta(PI / 2);
+      }
+      if (BTN_STATE(1)) {
         STATE = IDLE;
-    }
+        digitalWrite(STEP_ENABLE, HIGH);
+        displayScreen(STATE);
+      }
+      break;
+    case RUNNING:
+      Robot.update();
+      if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
+        STATE = STOPPED;
+        displayScreen(STATE);
+      }
+      if (Robot.getState() == 0) {
+        STATE = END_RUN;
+        displayScreen(STATE);
+      }
+      break;
+    case END_RUN:
+      if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
+        STATE = IDLE;
+        digitalWrite(STEP_ENABLE, HIGH);
+        displayScreen(STATE);
+      }
+      break;
+    case STOPPED:
+      if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
+        STATE = IDLE;
+        displayScreen(STATE);
+      }
+      break;
+    case ADJUST_MENU:
+      STATE = getOffsetType();
+      displayScreen(STATE);
+    break;
+    case SD_ERROR:
+      break;
+    case FILE_ERROR:
+      break;
+    case IMU_ERROR:
+      break;
+    default:
+      STATE = IDLE;
   }
+}
 
-  void engageSteppers(void *parameter) {
-    //esp_task_wdt_init(300, false);
-    steppersEngaged_mtx.lock();
-    while (stepperL.run() && stepperR.run())
-      ;
-    stepperL.setCurrentPosition(stepperL.targetPosition());
-    stepperR.setCurrentPosition(stepperR.targetPosition());
-    steppersEngaged_mtx.unlock();
-    vTaskDelete(NULL);
-  }
+void engageSteppers(void *parameter) {
+  //esp_task_wdt_init(300, false);
+  steppersEngaged_mtx.lock();
+  while (stepperL.run() && stepperR.run())
+    ;
+  stepperL.setCurrentPosition(stepperL.targetPosition());
+  stepperR.setCurrentPosition(stepperR.targetPosition());
+  steppersEngaged_mtx.unlock();
+  vTaskDelete(NULL);
+}
 
-  //no more x y offset in SD file
-  boolean loadPathFromSD(fs::FS & fs) {
-    /*
+//no more x y offset in SD file
+boolean loadPathFromSD(fs::FS &fs) {
+  /*
      FILE FORMAT
      
      PATH MODE:
@@ -270,248 +236,250 @@ void setup() {
      B2
      ...
   */
-    File file = fs.open(PATH_FILE);
-    if (!file) {
-      Serial.println("no_file!");
-      return false;
-    }
-    PATH_SIZE = 0;
-    char buff[10];
-
-    //read in the mode for path following
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-    for (int i = 0; i < 1; i++) {
-      buff[i] = file.read();
-    }
-
-    PATH_MODE = atoi(buff);
-    file.read();
-
-    //read in target time
-
-    //skip first line until newline is reached
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-    for (int i = 0; i < 5; i++) {
-      buff[i] = file.read();
-    }
-    TARGET_TIME = atof(buff);
-    file.read();
-
-    //skip line
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-
-    //read in gate number
-    buff[0] = '0';
-    buff[1] = file.read();
-    GATE_SIZE = atoi(buff);
-    file.read();
-
-    //Skip line
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-
-    //Read in Gates
-    for (byte i = 0; i < GATE_SIZE; i++) {
-      buff[0] = file.read();
-      buff[1] = file.read();
-      //coords
-      double pX, pY;
-      switch (buff[0]) {
-        case 'A':
-          pX = 250;
-          break;
-        case 'B':
-          pX = 750;
-          break;
-        case 'C':
-          pX = 1250;
-          break;
-        case 'D':
-          pX = 1750;
-          break;
-        case 'E':
-          pX = 2250;
-          break;
-        default:
-          Serial.println("bad_gate!");
-          return false;
-      }
-      switch (buff[1]) {
-        case '1':
-          pY = 250;
-          break;
-        case '2':
-          pY = 750;
-          break;
-        case '3':
-          pY = 1250;
-          break;
-        case '4':
-          pY = 1750;
-          break;
-        case '5':
-          pY = 2250;
-          break;
-        default:
-          Serial.println("bad_gate!");
-          return false;
-      }
-
-      GATES[i] = Vector2d(pX, pY);
-
-      //Skip to next line
-      while (file.available()) {
-        if (file.read() == '\n') {
-          break;
-        }
-      }
-    }
-
-    //Skip line
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-    bool firstDone = false;
-    //Read in paths
-    while (file.available()) {
-      buff[0] = file.read();
-      buff[1] = file.read();
-      //coords
-      double pX, pY;
-      switch (buff[0]) {
-        case 'A':
-          pX = 250;
-          break;
-        case 'B':
-          pX = 750;
-          break;
-        case 'C':
-          pX = 1250;
-          break;
-        case 'D':
-          pX = 1750;
-          break;
-        case 'E':
-          pX = 2250;
-          break;
-        default:
-          Serial.println("bad_path!");
-          return false;
-      }
-      switch (buff[1]) {
-        case '1':
-          pY = 250;
-          break;
-        case '2':
-          pY = 750;
-          break;
-        case '3':
-          pY = 1250;
-          break;
-        case '4':
-          pY = 1750;
-          break;
-        case '5':
-          pY = 2250;
-          break;
-        default:
-          Serial.println("bad_path!");
-          return false;
-      }
-      if (!firstDone) {
-        PATH[PATH_SIZE] = Vector2d(pX, -DIST_TO_DOWEL);
-        PATH_SIZE++;
-        firstDone = true;
-      }
-      PATH[PATH_SIZE] = Vector2d(pX, pY);
-      PATH_SIZE++;
-      while (file.available()) {
-        if (file.read() == '\n') {
-          break;
-        }
-      }
-    }
-    return true;
-  }
-  bool BTN_STATE(uint8_t index) {
-    bool buttonstate = digitalRead(BTN_PINS[index]);
-    if (buttonstate != BTN_PREV_STATES[index]) {
-      BTN_PREV_STATES[index] = buttonstate;
-      if (buttonstate == HIGH) {
-        return true;
-      }
-    }
+  File file = fs.open(PATH_FILE);
+  if (!file) {
+    Serial.println("no_file!");
     return false;
   }
-  void testTurns() {
-    delay(2000);
-    robotController.init();
-    Robot.init(1);
-    oled.clear();
-    oled.set1X();
-    oled.println("TESTING TURN");
-    digitalWrite(STEP_ENABLE, LOW);
-    for (int i = 0; i < 50; i++) {
-      robotController.setTheta(PI / 2);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
-      robotController.setTheta(0);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
-      robotController.setTheta(PI);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
-      robotController.setTheta(0);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
+  PATH_SIZE = 0;
+  char buff[10];
+
+  //read in the mode for path following
+  while (file.available()) {
+    if (file.read() == '\n') {
+      break;
     }
   }
-  void testDist() {
-    delay(2000);
-    robotController.init();
+  for (int i = 0; i < 1; i++) {
+    buff[i] = file.read();
+  }
+
+  PATH_MODE = atoi(buff);
+  file.read();
+
+  //read in target time
+
+  //skip first line until newline is reached
+  while (file.available()) {
+    if (file.read() == '\n') {
+      break;
+    }
+  }
+  for (int i = 0; i < 5; i++) {
+    buff[i] = file.read();
+  }
+  TARGET_TIME = atof(buff);
+  file.read();
+
+  //skip line
+  while (file.available()) {
+    if (file.read() == '\n') {
+      break;
+    }
+  }
+
+  //read in gate number
+  buff[0] = '0';
+  buff[1] = file.read();
+  GATE_SIZE = atoi(buff);
+  file.read();
+
+  //Skip line
+  while (file.available()) {
+    if (file.read() == '\n') {
+      break;
+    }
+  }
+
+  //Read in Gates
+  for (byte i = 0; i < GATE_SIZE; i++) {
+    buff[0] = file.read();
+    buff[1] = file.read();
+    //coords
+    double pX, pY;
+    switch (buff[0]) {
+      case 'A':
+        pX = 250;
+        break;
+      case 'B':
+        pX = 750;
+        break;
+      case 'C':
+        pX = 1250;
+        break;
+      case 'D':
+        pX = 1750;
+        break;
+      case 'E':
+        pX = 2250;
+        break;
+      default:
+        Serial.println("bad_gate!");
+        return false;
+    }
+    switch (buff[1]) {
+      case '1':
+        pY = 250;
+        break;
+      case '2':
+        pY = 750;
+        break;
+      case '3':
+        pY = 1250;
+        break;
+      case '4':
+        pY = 1750;
+        break;
+      case '5':
+        pY = 2250;
+        break;
+      default:
+        Serial.println("bad_gate!");
+        return false;
+    }
+
+    GATES[i] = Vector2d(pX, pY);
+
+    //Skip to next line
+    while (file.available()) {
+      if (file.read() == '\n') {
+        break;
+      }
+    }
+  }
+
+  //Skip line
+  while (file.available()) {
+    if (file.read() == '\n') {
+      break;
+    }
+  }
+  bool firstDone = false;
+  //Read in paths
+  while (file.available()) {
+    buff[0] = file.read();
+    buff[1] = file.read();
+    //coords
+    double pX, pY;
+    switch (buff[0]) {
+      case 'A':
+        pX = 250;
+        break;
+      case 'B':
+        pX = 750;
+        break;
+      case 'C':
+        pX = 1250;
+        break;
+      case 'D':
+        pX = 1750;
+        break;
+      case 'E':
+        pX = 2250;
+        break;
+      default:
+        Serial.println("bad_path!");
+        return false;
+    }
+    switch (buff[1]) {
+      case '1':
+        pY = 250;
+        break;
+      case '2':
+        pY = 750;
+        break;
+      case '3':
+        pY = 1250;
+        break;
+      case '4':
+        pY = 1750;
+        break;
+      case '5':
+        pY = 2250;
+        break;
+      default:
+        Serial.println("bad_path!");
+        return false;
+    }
+    if (!firstDone) {
+      PATH[PATH_SIZE] = Vector2d(pX, -DIST_TO_DOWEL);
+      PATH_SIZE++;
+      firstDone = true;
+    }
+    PATH[PATH_SIZE] = Vector2d(pX, pY);
+    PATH_SIZE++;
+    while (file.available()) {
+      if (file.read() == '\n') {
+        break;
+      }
+    }
+  }
+  return true;
+}
+
+void testTurns() {
+  delay(2000);
+  robotController.init();
+  Robot.init(1);
+  STATE = RUNNING;
+  displayScreen(STATE);
+  digitalWrite(STEP_ENABLE, LOW);
+  for (int i = 0; i < 50; i++) {
     robotController.setTheta(PI / 2);
-    Robot.init(1);
-    oled.clear();
-    oled.set1X();
-    oled.println("TESTING FORW");
-    digitalWrite(STEP_ENABLE, LOW);
-    robotController.setMaxVx(MAX_VX);
-    for (int i = 0; i < 50; i++) {
-      robotController.moveX(300);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
-      robotController.moveX(-300);
-      while (robotController.getState() != 0) {
-        robotController.update();
-      }
-      delay(500);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+    robotController.setTheta(0);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+    robotController.setTheta(PI);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+    robotController.setTheta(0);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+  }
+  STATE = END_RUN;
+}
+
+void testDist() {
+  delay(2000);
+  robotController.init();
+  robotController.setTheta(PI / 2);
+  Robot.init(1);
+  STATE = RUNNING;
+  displayScreen(STATE);
+  digitalWrite(STEP_ENABLE, LOW);
+  robotController.setMaxVx(MAX_VX);
+  for (int i = 0; i < 50; i++) {
+    robotController.moveX(300);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+    robotController.moveX(-300);
+    while (robotController.getState() != 0) {
+      robotController.update();
+    }
+    delay(500);
+  }
+  STATE = END_RUN;
+}
+
+bool BTN_STATE(uint8_t index) {
+  bool buttonstate = digitalRead(BTN_PINS[index]);
+  if (buttonstate != BTN_PREV_STATES[index]) {
+    BTN_PREV_STATES[index] = buttonstate;
+    if (buttonstate == HIGH) {
+      return true;
     }
   }
+  return false;
 }

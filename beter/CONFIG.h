@@ -1,10 +1,10 @@
 //Hardware connections
 
 //Buttons for input
-#define BTN_0 1 //INIT | x | x
-#define BTN_1 2 //RUN | TIME | INCREMENT
-#define BTN_2 3 //ADJUSTMENTS | XCHANGE | UP
-#define BTN_3 4 //LASERS | YCHANGE | DOWN
+#define BTN_0 1 //INIT | x
+#define BTN_1 2 //RUN | INCREMENT
+#define BTN_2 3 //ADJUSTMENTS | UP
+#define BTN_3 4 //LASERS | DOWN
 
 //Rotary Encoder
 #define INCR_BTN 5
@@ -30,8 +30,11 @@
 #define SCREEN_ADDRESS 0x3C
 #define SCREEN_WIRE &Wire
 
+//LASERS
+#define LASERS 45
+
 //LEDS
-#define LED_0 6 //
+#define LED_0 6
 #define LED_1 7
 
 //SD Card
@@ -71,11 +74,10 @@
 #define RUNNING 2
 #define END_RUN 3
 #define STOPPED 4
-#define ERROR 5
-#define SD_ERROR 6
-#define FILE_ERROR 7
-#define IMU_ERROR 8
-#define ADJUST_MENU 9
-#define ADJUST_X 10
-#define ADJUST_Y 11
-#define ADJUST_TIME 12
+#define SD_ERROR 5
+#define FILE_ERROR 6
+#define IMU_ERROR 7
+#define ADJUST_MENU 8
+#define ADJUST_X 9
+#define ADJUST_Y 10
+#define ADJUST_TIME 11
