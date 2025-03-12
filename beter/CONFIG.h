@@ -2,9 +2,9 @@
 
 //Buttons for input
 #define BTN_0 1 //INIT | x
-#define BTN_1 2 //RUN | INCREMENT
-#define BTN_2 3 //ADJUSTMENTS | UP
-#define BTN_3 4 //LASERS | DOWN
+#define BTN_1 2 //RUN | TIME ADJUST
+#define BTN_2 3 //ADJUSTMENTS | X ADJUST
+#define BTN_3 4 //LASERS | Y ADJUST
 
 //Rotary Encoder
 #define INCR_BTN 5

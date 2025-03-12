@@ -6,7 +6,6 @@
 #include "controller.h"
 #include "simplePursuit.h"
 #include "robot.h"
-#include "menu.h"
 
 #include <ArduinoEigenDense.h>
 using namespace Eigen;
@@ -34,6 +33,14 @@ uint8_t GATE_SIZE;
 double TARGET_TIME;
 
 int PATH_MODE;
+
+double TIME_INCREMENT = 0.1;
+double DIST_INCREMENT = 1;
+int TICKS = 0;
+double FINAL_OFFSET_X;
+double FINAL_OFFSET_Y;
+double TIME_OFFSET;
+double TEMP_OFFSET;
 
 uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
 bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
@@ -94,6 +101,8 @@ void setup() {
   pinMode(LED_1, OUTPUT);
   pinMode(LASERS, OUTPUT);
 
+  attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
+
   //oled init
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
   SCREEN.clearDisplay();
@@ -140,7 +149,7 @@ void loop() {
     case IDLE:
       if (BTN_STATE(1)) {
         Robot.init(PATH_MODE);
-        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME+TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_ENABLE, LOW);
         displayScreen(STATE);
@@ -192,9 +201,88 @@ void loop() {
       }
       break;
     case ADJUST_MENU:
-      STATE = getOffsetType();
+      TICKS = 0;
+      STATE = ADJUST_TIME;
       displayScreen(STATE);
-    break;
+      break;
+    case ADJUST_TIME:
+      TEMP_OFFSET = TICKS*TIME_INCREMENT;
+      if (BTN_STATE(1)) {
+        STATE = IDLE;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(0)) {
+          STATE = ADJUST_TIME;
+          TICKS = 0;
+          displayScreen(STATE);
+        }
+      if (BTN_STATE(2)) {
+        STATE = ADJUST_X;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        STATE = ADJUST_Y;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if(BTN_STATE(4)){
+        TIME_OFFSET = TEMP_OFFSET;
+        displayScreen(STATE);
+      }
+      break;
+    case ADJUST_X:
+      TEMP_OFFSET = TICKS*DIST_INCREMENT;
+      if (BTN_STATE(1)) {
+        STATE = IDLE;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(0)) {
+          STATE = ADJUST_TIME;
+          TICKS = 0;
+          displayScreen(STATE);
+        }
+      if (BTN_STATE(2)) {
+        STATE = ADJUST_X;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        STATE = ADJUST_Y;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if(BTN_STATE(4)){
+        FINAL_OFFSET_X = TEMP_OFFSET;
+        displayScreen(STATE);
+      }
+      break;
+    case ADJUST_Y:
+    TEMP_OFFSET = TICKS*DIST_INCREMENT;
+      if (BTN_STATE(1)) {
+        STATE = IDLE;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(0)) {
+          STATE = ADJUST_TIME;
+          TICKS = 0;
+          displayScreen(STATE);
+        }
+      if (BTN_STATE(2)) {
+        STATE = ADJUST_X;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        STATE = ADJUST_Y;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
+      if(BTN_STATE(4)){
+        FINAL_OFFSET_Y = TEMP_OFFSET;
+        displayScreen(STATE);
+      }
+      break;
     case SD_ERROR:
       break;
     case FILE_ERROR:
@@ -482,4 +570,69 @@ bool BTN_STATE(uint8_t index) {
     }
   }
   return false;
+}
+//Interrupts
+void encoderInterruptHandlerA() {
+  if (digitalRead(INCR_A) != digitalRead(INCR_B)) {
+    TICKS--;
+  }
+  else {
+    TICKS++;
+  }
+  displayScreen(STATE);
+}
+
+void encoderInterruptHandlerB() {
+  if (digitalRead(INCR_A) == digitalRead(INCR_B)) {
+    TICKS--;
+  }
+  else {
+    TICKS++;
+  }
+  displayScreen(STATE);
+}
+
+void displayScreen(int state) {
+  switch (state) {
+    case INIT:
+
+      break;
+    case IDLE:
+
+      break;
+    case READY:
+
+      break;
+    case RUNNING:
+
+      break;
+    case END_RUN:
+
+      break;
+    case STOPPED:
+
+      break;
+    case SD_ERROR:
+
+      break;
+    case FILE_ERROR:
+
+      break;
+    case IMU_ERROR:
+
+      break;
+    case ADJUST_MENU:
+
+      break;
+    case ADJUST_X:
+
+      break;
+    case ADJUST_Y:
+
+      break;
+
+    case ADJUST_TIME:
+
+      break;
+  }
 }
