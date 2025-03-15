@@ -9,7 +9,7 @@
 #include "CONFIG.h"
 
 void gyroInit();
-BMI270 imu1;
+extern BMI270 imu1;
 
 class controller {
   private:

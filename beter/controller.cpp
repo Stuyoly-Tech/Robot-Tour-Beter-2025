@@ -8,6 +8,8 @@
 
 #define RIGHT_OFF 1.00
 
+BMI270 imu1;
+
 void gyroInit() {
   imu1.beginI2C(IMU_ADDRESS);
   imu1.performComponentRetrim();
