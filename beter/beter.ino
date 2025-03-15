@@ -13,7 +13,7 @@ using namespace Eigen;
 #include "FS.h"
 #include "SPI.h"
 
-#include <BMI160Gen.h>
+#include "SparkFun_BMI270_Arduino_Library.h"
 
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
@@ -108,15 +108,7 @@ void setup() {
   SCREEN.clearDisplay();
   SCREEN.display();
 
-  //gyro init
-  if (!BMI160.begin(BMI160GenClass::I2C_MODE, Wire, IMU_ADDRESS)) {
-    STATE = IMU_ERROR;
-    displayScreen(STATE);
-  }
-
-  delay(500);
-  BMI160.setFullScaleGyroRange(1);  //1000 deg/s
-  BMI160.autoCalibrateGyroOffset();
+  gyroInit();
 
   //SD begin
   if (SD.begin(SD_CS) == 0) {
@@ -148,8 +140,11 @@ void loop() {
       break;
     case IDLE:
       if (BTN_STATE(1)) {
+        STATE = INIT;
+        gyroInit();
+        displayScreen(STATE);
         Robot.init(PATH_MODE);
-        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME+TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_ENABLE, LOW);
         displayScreen(STATE);
@@ -165,6 +160,8 @@ void loop() {
       break;
     case READY:
       if (BTN_STATE(0)) {
+        digitalWrite(LASERS, LOW);
+        digitalWrite(LED_0, LOW);
         Robot.startPath();
         STATE = RUNNING;
         displayScreen(STATE);
@@ -206,16 +203,16 @@ void loop() {
       displayScreen(STATE);
       break;
     case ADJUST_TIME:
-      TEMP_OFFSET = TICKS*TIME_INCREMENT;
+      TEMP_OFFSET = TICKS * TIME_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
         displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
-          STATE = ADJUST_TIME;
-          TICKS = 0;
-          displayScreen(STATE);
-        }
+        STATE = ADJUST_TIME;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
@@ -226,22 +223,22 @@ void loop() {
         TICKS = 0;
         displayScreen(STATE);
       }
-      if(BTN_STATE(4)){
+      if (BTN_STATE(4)) {
         TIME_OFFSET = TEMP_OFFSET;
         displayScreen(STATE);
       }
       break;
     case ADJUST_X:
-      TEMP_OFFSET = TICKS*DIST_INCREMENT;
+      TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
         displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
-          STATE = ADJUST_TIME;
-          TICKS = 0;
-          displayScreen(STATE);
-        }
+        STATE = ADJUST_TIME;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
@@ -252,22 +249,22 @@ void loop() {
         TICKS = 0;
         displayScreen(STATE);
       }
-      if(BTN_STATE(4)){
+      if (BTN_STATE(4)) {
         FINAL_OFFSET_X = TEMP_OFFSET;
         displayScreen(STATE);
       }
       break;
     case ADJUST_Y:
-    TEMP_OFFSET = TICKS*DIST_INCREMENT;
+      TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
         displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
-          STATE = ADJUST_TIME;
-          TICKS = 0;
-          displayScreen(STATE);
-        }
+        STATE = ADJUST_TIME;
+        TICKS = 0;
+        displayScreen(STATE);
+      }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
@@ -278,7 +275,7 @@ void loop() {
         TICKS = 0;
         displayScreen(STATE);
       }
-      if(BTN_STATE(4)){
+      if (BTN_STATE(4)) {
         FINAL_OFFSET_Y = TEMP_OFFSET;
         displayScreen(STATE);
       }
@@ -575,8 +572,7 @@ bool BTN_STATE(uint8_t index) {
 void encoderInterruptHandlerA() {
   if (digitalRead(INCR_A) != digitalRead(INCR_B)) {
     TICKS--;
-  }
-  else {
+  } else {
     TICKS++;
   }
   displayScreen(STATE);
@@ -585,54 +581,178 @@ void encoderInterruptHandlerA() {
 void encoderInterruptHandlerB() {
   if (digitalRead(INCR_A) == digitalRead(INCR_B)) {
     TICKS--;
-  }
-  else {
+  } else {
     TICKS++;
   }
   displayScreen(STATE);
 }
 
 void displayScreen(int state) {
+  SCREEN.clearDisplay();
+  SCREEN.setTextColor(SSD1306_WHITE);
   switch (state) {
     case INIT:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(1, 1);
+      SCREEN.print("INIT: DON'T MOVE");
       break;
     case IDLE:
+      //Button Letters
+      SCREEN.setTextSize(1);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("E");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, 0);
+      SCREEN.print("A");
+      SCREEN.setCursor(0, SCREEN_HEIGHT - 10);
+      SCREEN.print("R");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
+      SCREEN.print("L");
 
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
+      SCREEN.println("NOT READY");
+      SCREEN.println("TARGET TIME:");
+      SCREEN.println(TARGET_TIME + TIME_OFFSET, 3);
+      SCREEN.println("X OFFSET(mm):");
+      SCREEN.println(FINAL_OFFSET_X, 3);
+      SCREEN.println("Y OFFSET(mm):");
+      SCREEN.println(FINAL_OFFSET_Y, 3);
+      SCREEN.println("LASERS?");
+      if (digitalRead(LASERS)) {
+        SCREEN.print("YES");
+      } else SCREEN.print("NO");
       break;
     case READY:
+      //Button Letters
+      SCREEN.setTextSize(1);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("E");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, 0);
+      SCREEN.print("A");
+      SCREEN.setCursor(0, SCREEN_HEIGHT - 10);
+      SCREEN.print("R");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
+      SCREEN.print("L");
 
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
+      SCREEN.println("READY");
+      SCREEN.println("TARGET TIME:");
+      SCREEN.println(TARGET_TIME + TIME_OFFSET, 3);
+      SCREEN.println("X OFFSET(mm):");
+      SCREEN.println(FINAL_OFFSET_X, 3);
+      SCREEN.println("Y OFFSET(mm):");
+      SCREEN.println(FINAL_OFFSET_Y, 3);
+      SCREEN.println("LASERS?");
+      if (digitalRead(LASERS)) {
+        SCREEN.print("YES");
+      } else SCREEN.print("NO");
       break;
     case RUNNING:
-
+      SCREEN.setTextSize(3);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("RUNNING");
       break;
     case END_RUN:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(0, 0);
+      SCREEN.println("RUN ENDED");
+      SCREEN.println("RUNTIME:");
+      SCREEN.print(Robot.stopPath());
       break;
     case STOPPED:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(0, 0);
+      SCREEN.println("RUN STOPPED");
+      SCREEN.println("RUNTIME:");
+      SCREEN.print(Robot.stopPath());
       break;
     case SD_ERROR:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(0, 0);
+      SCREEN.println("SD ERROR");
       break;
     case FILE_ERROR:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(0, 0);
+      SCREEN.println("FILE ERROR");
       break;
     case IMU_ERROR:
-
-      break;
-    case ADJUST_MENU:
-
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor(0, 0);
+      SCREEN.println("IMU ERROR");
       break;
     case ADJUST_X:
+      //Button Letters
+      SCREEN.setTextSize(1);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("x");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, 0);
+      SCREEN.print("X");
+      SCREEN.setCursor(0, SCREEN_HEIGHT - 10);
+      SCREEN.print("T");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
+      SCREEN.print("Y");
 
+      SCREEN.setTextSize(3);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
+      SCREEN.println("X OFFSET");
+      SCREEN.setTextSize(1);
+      if (TEMP_OFFSET = FINAL_OFFSET_X) {
+        SCREEN.println("SAVED");
+      } else {
+        SCREEN.println("UNSAVED");
+      }
+      SCREEN.print(TEMP_OFFSET);
+      SCREEN.print("mm");
       break;
     case ADJUST_Y:
+      //Button Letters
+      SCREEN.setTextSize(1);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("x");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, 0);
+      SCREEN.print("X");
+      SCREEN.setCursor(0, SCREEN_HEIGHT - 10);
+      SCREEN.print("T");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
+      SCREEN.print("Y");
 
+      SCREEN.setTextSize(3);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
+      SCREEN.println("Y OFFSET");
+      SCREEN.setTextSize(1);
+      if (TEMP_OFFSET = FINAL_OFFSET_Y) {
+        SCREEN.println("SAVED");
+      } else {
+        SCREEN.println("UNSAVED");
+      }
+      SCREEN.print(TEMP_OFFSET);
+      SCREEN.print("mm");
       break;
 
     case ADJUST_TIME:
+      //Button Letters
+      SCREEN.setTextSize(1);
+      SCREEN.setCursor(0, 0);
+      SCREEN.print("x");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, 0);
+      SCREEN.print("X");
+      SCREEN.setCursor(0, SCREEN_HEIGHT - 10);
+      SCREEN.print("T");
+      SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
+      SCREEN.print("Y");
 
+      SCREEN.setTextSize(3);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
+      SCREEN.println("TIME OFFSET");
+      SCREEN.setTextSize(1);
+      if (TEMP_OFFSET = TIME_OFFSET) {
+        SCREEN.println("SAVED");
+      } else {
+        SCREEN.println("UNSAVED");
+      }
+      SCREEN.print(TEMP_OFFSET);
+      SCREEN.print("s");
       break;
   }
+  SCREEN.display();
 }

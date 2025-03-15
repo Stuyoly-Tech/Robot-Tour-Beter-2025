@@ -5,7 +5,11 @@
 
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include <BMI160Gen.h>
+#include "SparkFun_BMI270_Arduino_Library.h"
+#include "CONFIG.h"
+
+void gyroInit();
+BMI270 imu1;
 
 class controller {
   private:
