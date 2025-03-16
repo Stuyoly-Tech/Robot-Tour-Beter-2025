@@ -18,6 +18,8 @@ using namespace Eigen;
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 
+
+
 //FSM State
 int STATE;
 
@@ -47,7 +49,6 @@ bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
-SPIClass SPI2(HSPI);
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
@@ -84,7 +85,8 @@ void setup() {
   STATE = INIT;
 
   Serial.begin(115200);
-
+  Serial.println(SDA);
+  Serial.println(SCL);
   Wire.begin(17, 18);
   Wire.setClock(400000L);
 
@@ -102,6 +104,9 @@ void setup() {
   pinMode(LED_1, OUTPUT);
   pinMode(LASERS, OUTPUT);
 
+  //pinMode(SD_CS, OUTPUT);
+  //digitalWrite(SD_CS, HIGH);
+
   attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
 
   //oled init
@@ -110,22 +115,29 @@ void setup() {
   SCREEN.display();
   STATE = INIT;
   displayScreen(STATE);
-
+  Serial.println("1");
   gyroInit();
 
 
   //sd init
-    SPI2.begin(SD_CS, SD_MISO, SD_MOSI, SD_CS);
-  if (!SD.begin(SD_CS, SPI2)){
+  Serial.println("2");
+  SPI.begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
+  if (!SD.begin(41, SPI)) {
     Serial.println("SD Initialization failed!");
+  } else {
+    Serial.println("SD Initialization good!");
   }
+  Serial.println("3");
   //load Paths
   if (!loadPathFromSD(SD)) {
     STATE = FILE_ERROR;
     displayScreen(STATE);
   }
 
+  Serial.println("4");
+
   if (STATE == INIT) {
+    Serial.println("init successful");
     STATE = IDLE;
     displayScreen(STATE);
   }
@@ -146,12 +158,13 @@ void loop() {
     case IDLE:
       if (BTN_STATE(1)) {
         STATE = INIT;
-        gyroInit();
         displayScreen(STATE);
+        gyroInit();
         Robot.init(PATH_MODE);
         robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_ENABLE, LOW);
+        digitalWrite(LED_0, HIGH);
         displayScreen(STATE);
       }
       if (BTN_STATE(2)) {
@@ -160,13 +173,15 @@ void loop() {
       }
       if (BTN_STATE(3)) {
         digitalWrite(LASERS, !digitalRead(LASERS));
-        digitalWrite(LED_0, !digitalRead(LED_0));
+        digitalWrite(LED_1, !digitalRead(LED_1));
+        displayScreen(STATE);
       }
       break;
     case READY:
       if (BTN_STATE(0)) {
         digitalWrite(LASERS, LOW);
-        digitalWrite(LED_0, LOW);
+        digitalWrite(LED_0, HIGH);
+        digitalWrite(LED_1, HIGH);
         Robot.startPath();
         STATE = RUNNING;
         displayScreen(STATE);
@@ -175,6 +190,7 @@ void loop() {
       if (BTN_STATE(1)) {
         STATE = IDLE;
         digitalWrite(STEP_ENABLE, HIGH);
+        digitalWrite(LED_0, LOW);
         displayScreen(STATE);
       }
       break;
@@ -205,85 +221,78 @@ void loop() {
     case ADJUST_MENU:
       TICKS = 0;
       STATE = ADJUST_TIME;
-      displayScreen(STATE);
       break;
     case ADJUST_TIME:
       TEMP_OFFSET = TICKS * TIME_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
-        displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
         STATE = ADJUST_TIME;
         TICKS = 0;
-        displayScreen(STATE);
+        TIME_OFFSET = 0;
       }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
         STATE = ADJUST_Y;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         TIME_OFFSET = TEMP_OFFSET;
-        displayScreen(STATE);
       }
+      delay(100);
+      displayScreen(STATE);
       break;
     case ADJUST_X:
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
-        displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
         STATE = ADJUST_TIME;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
-        displayScreen(STATE);
+        FINAL_OFFSET_X = 0;
       }
       if (BTN_STATE(3)) {
         STATE = ADJUST_Y;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         FINAL_OFFSET_X = TEMP_OFFSET;
-        displayScreen(STATE);
       }
+      delay(100);
+      displayScreen(STATE);
       break;
     case ADJUST_Y:
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
-        displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
         STATE = ADJUST_TIME;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(2)) {
         STATE = ADJUST_X;
         TICKS = 0;
-        displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
         STATE = ADJUST_Y;
         TICKS = 0;
-        displayScreen(STATE);
+        FINAL_OFFSET_Y = 0;
       }
       if (BTN_STATE(4)) {
         FINAL_OFFSET_Y = TEMP_OFFSET;
-        displayScreen(STATE);
       }
+      delay(100);
+      displayScreen(STATE);
       break;
     case SD_ERROR:
       break;
@@ -611,15 +620,25 @@ void displayScreen(int state) {
       SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
       SCREEN.print("L");
 
-      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
-      SCREEN.println("NOT READY");
-      SCREEN.println("TARGET TIME:");
-      SCREEN.println(TARGET_TIME + TIME_OFFSET, 3);
-      SCREEN.println("X OFFSET(mm):");
-      SCREEN.println(FINAL_OFFSET_X, 3);
-      SCREEN.println("Y OFFSET(mm):");
-      SCREEN.println(FINAL_OFFSET_Y, 3);
-      SCREEN.println("LASERS?");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+      SCREEN.print("NOT READY");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 1 * 8);
+      SCREEN.print("TARGET TIME:");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 2 * 8);
+      SCREEN.print(TARGET_TIME + TIME_OFFSET, 3);
+      SCREEN.print("s");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 3 * 8);
+      SCREEN.print("X OFFSET");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 4 * 8);
+      SCREEN.print(FINAL_OFFSET_X, 3);
+      SCREEN.print("mm");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 5 * 8);
+      SCREEN.print("Y OFFSET");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 6 * 8);
+      SCREEN.print(FINAL_OFFSET_Y, 3);
+      SCREEN.print("mm");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 7 * 8);
+      SCREEN.print("LASERS?");
       if (digitalRead(LASERS)) {
         SCREEN.print("YES");
       } else SCREEN.print("NO");
@@ -636,15 +655,25 @@ void displayScreen(int state) {
       SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
       SCREEN.print("L");
 
-      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
-      SCREEN.println("READY");
-      SCREEN.println("TARGET TIME:");
-      SCREEN.println(TARGET_TIME + TIME_OFFSET, 3);
-      SCREEN.println("X OFFSET(mm):");
-      SCREEN.println(FINAL_OFFSET_X, 3);
-      SCREEN.println("Y OFFSET(mm):");
-      SCREEN.println(FINAL_OFFSET_Y, 3);
-      SCREEN.println("LASERS?");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+      SCREEN.print("READY");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 1 * 8);
+      SCREEN.print("TARGET TIME:");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 2 * 8);
+      SCREEN.print(TARGET_TIME + TIME_OFFSET, 3);
+      SCREEN.print("s");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 3 * 8);
+      SCREEN.print("X OFFSET:");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 4 * 8);
+      SCREEN.print(FINAL_OFFSET_X, 3);
+      SCREEN.print("mm");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 5 * 8);
+      SCREEN.print("Y OFFSET");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 6 * 8);
+      SCREEN.print(FINAL_OFFSET_Y, 3);
+      SCREEN.print("mm");
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 7 * 8);
+      SCREEN.print("LASERS?");
       if (digitalRead(LASERS)) {
         SCREEN.print("YES");
       } else SCREEN.print("NO");
@@ -660,6 +689,7 @@ void displayScreen(int state) {
       SCREEN.println("RUN ENDED");
       SCREEN.println("RUNTIME:");
       SCREEN.print(Robot.stopPath());
+      SCREEN.print("s");
       break;
     case STOPPED:
       SCREEN.setTextSize(2);
@@ -667,6 +697,7 @@ void displayScreen(int state) {
       SCREEN.println("RUN STOPPED");
       SCREEN.println("RUNTIME:");
       SCREEN.print(Robot.stopPath());
+      SCREEN.print("s");
       break;
     case SD_ERROR:
       SCREEN.setTextSize(2);
@@ -695,15 +726,18 @@ void displayScreen(int state) {
       SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
       SCREEN.print("Y");
 
-      SCREEN.setTextSize(3);
-      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
-      SCREEN.println("X OFFSET");
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+      SCREEN.print("X OFF");
       SCREEN.setTextSize(1);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
       if (TEMP_OFFSET = FINAL_OFFSET_X) {
-        SCREEN.println("SAVED");
+        SCREEN.print("SAVED");
       } else {
-        SCREEN.println("UNSAVED");
+        SCREEN.print("UNSAVED");
       }
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 28);
       SCREEN.print(TEMP_OFFSET);
       SCREEN.print("mm");
       break;
@@ -719,15 +753,18 @@ void displayScreen(int state) {
       SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
       SCREEN.print("Y");
 
-      SCREEN.setTextSize(3);
-      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
-      SCREEN.println("Y OFFSET");
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+      SCREEN.print("Y OFF");
       SCREEN.setTextSize(1);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
       if (TEMP_OFFSET = FINAL_OFFSET_Y) {
-        SCREEN.println("SAVED");
+        SCREEN.print("SAVED");
       } else {
-        SCREEN.println("UNSAVED");
+        SCREEN.print("UNSAVED");
       }
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 28);
       SCREEN.print(TEMP_OFFSET);
       SCREEN.print("mm");
       break;
@@ -744,15 +781,18 @@ void displayScreen(int state) {
       SCREEN.setCursor(SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10);
       SCREEN.print("Y");
 
-      SCREEN.setTextSize(3);
-      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8, 0);
-      SCREEN.println("TIME OFFSET");
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+      SCREEN.print("TIME OFF");
       SCREEN.setTextSize(1);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
       if (TEMP_OFFSET = TIME_OFFSET) {
-        SCREEN.println("SAVED");
+        SCREEN.print("SAVED");
       } else {
-        SCREEN.println("UNSAVED");
+        SCREEN.print("UNSAVED");
       }
+      SCREEN.setTextSize(2);
+      SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 28);
       SCREEN.print(TEMP_OFFSET);
       SCREEN.print("s");
       break;

@@ -1,8 +1,8 @@
 //Hardware connections
 
-//Buttons for input
-#define BTN_0 1 //INIT | x
-#define BTN_1 2 //RUN | TIME ADJUST
+//Buttons for input(0 and 1 are swapped from pcb labeling)
+#define BTN_0 2 //INIT | x
+#define BTN_1 1 //RUN | TIME ADJUST
 #define BTN_2 3 //ADJUSTMENTS | X ADJUST
 #define BTN_3 4 //LASERS | Y ADJUST
 
