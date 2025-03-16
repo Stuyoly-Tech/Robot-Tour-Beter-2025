@@ -47,6 +47,7 @@ bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
+SPIClass SPI2(HSPI);
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
@@ -110,16 +111,18 @@ void setup() {
   STATE = INIT;
   displayScreen(STATE);
 
-  //gyroInit();
+  gyroInit();
 
-  //SD begin
-  if (SD.begin(SD_CS) == 0) {
-    STATE = SD_ERROR;
+
+  //sd init
+    SPI2.begin(SD_CS, SD_MISO, SD_MOSI, SD_CS);
+  if (!SD.begin(SD_CS, SPI2)){
+    Serial.println("SD Initialization failed!");
   }
-
   //load Paths
   if (!loadPathFromSD(SD)) {
     STATE = FILE_ERROR;
+    displayScreen(STATE);
   }
 
   if (STATE == INIT) {

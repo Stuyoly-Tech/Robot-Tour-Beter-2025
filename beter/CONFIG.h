@@ -39,6 +39,9 @@
 
 //SD Card
 #define SD_CS 41
+#define SD_CLK 38
+#define SD_MOSI 40
+#define SD_MISO 39
 
 //BMI160 IMU
 #define IMU_ADDRESS 0x68
