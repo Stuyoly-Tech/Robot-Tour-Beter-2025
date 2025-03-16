@@ -41,7 +41,8 @@
 #define SD_CS 41
 
 //BMI160 IMU
-#define IMU_ADDRESS 0x34
+#define IMU_ADDRESS 0x68
+#define IMU2_ADDRESS 0x69
 #define IMU_UPDATE_US 0.10*pow(10, 3)
 
 //Robot physical dimensions

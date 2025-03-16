@@ -9,9 +9,9 @@
 
 #include <ArduinoEigenDense.h>
 using namespace Eigen;
-#include "SD.h"
 #include "FS.h"
 #include "SPI.h"
+#include "SD.h"
 
 #include "SparkFun_BMI270_Arduino_Library.h"
 
@@ -84,7 +84,7 @@ void setup() {
 
   Serial.begin(115200);
 
-  Wire.begin();
+  Wire.begin(17, 18);
   Wire.setClock(400000L);
 
   //init pins
@@ -107,8 +107,10 @@ void setup() {
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
   SCREEN.clearDisplay();
   SCREEN.display();
+  STATE = INIT;
+  displayScreen(STATE);
 
-  gyroInit();
+  //gyroInit();
 
   //SD begin
   if (SD.begin(SD_CS) == 0) {
@@ -575,7 +577,6 @@ void encoderInterruptHandlerA() {
   } else {
     TICKS++;
   }
-  displayScreen(STATE);
 }
 
 void encoderInterruptHandlerB() {
@@ -584,7 +585,6 @@ void encoderInterruptHandlerB() {
   } else {
     TICKS++;
   }
-  displayScreen(STATE);
 }
 
 void displayScreen(int state) {
@@ -592,7 +592,7 @@ void displayScreen(int state) {
   SCREEN.setTextColor(SSD1306_WHITE);
   switch (state) {
     case INIT:
-      SCREEN.setTextSize(2);
+      SCREEN.setTextSize(1);
       SCREEN.setCursor(1, 1);
       SCREEN.print("INIT: DON'T MOVE");
       break;
