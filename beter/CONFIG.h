@@ -11,16 +11,18 @@
 #define INCR_A 15
 #define INCR_B 16
 
+#define BUZZER 8
 
 //Motors
-#define STEP_L 10
-#define DIR_L 11
+#define STEP_L 21
+#define DIR_L 14
 
-#define STEP_R 12
-#define DIR_R 13
+#define STEP_R 11
+#define DIR_R 10
 
-#define STEP_ENABLE 17
-
+#define STEP_ENABLE 9
+#define VREF_VOLTAGE 0.9447
+#define DAC_ADDRESS 0x48
 #define STEPS_PER_REV 200*8//microsteps are controlled by dipswitch
 
 //Screen

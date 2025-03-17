@@ -10,6 +10,7 @@
 
 void gyroInit();
 extern BMI270 imu1;
+extern BMI270 imu2;
 
 class controller {
   private:

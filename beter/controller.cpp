@@ -9,11 +9,16 @@
 #define RIGHT_OFF 1.00
 
 BMI270 imu1;
+BMI270 imu2;
 
 void gyroInit() {
   imu1.beginI2C(IMU_ADDRESS);
   imu1.performComponentRetrim();
   imu1.performGyroOffsetCalibration();
+  imu2.beginI2C(IMU2_ADDRESS);
+  imu1.performComponentRetrim();
+  imu1.performGyroOffsetCalibration();
+  Serial.println("GYRO INIT");
 }
 
 controller::controller(
@@ -126,7 +131,8 @@ void controller::updateTheta() {
   //micros() - oldIMUus > intervalIMUus
   if (micros() - oldIMUus > intervalIMUus) {
     imu1.getSensorData();
-    double angVel = ((imu1.data.gyroZ * 1000.0) / 32768.0) * PI / 180;
+    imu2.getSensorData();
+    double angVel = (imu1.data.gyroZ + imu2.data.gyroZ) * PI / 360;
     //Serial.print("angvel: ");
     //Serial.println(angVel, 10);
     double interval = micros() - oldIMUus;

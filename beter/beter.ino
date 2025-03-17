@@ -36,8 +36,8 @@ double TARGET_TIME;
 
 int PATH_MODE;
 
-double TIME_INCREMENT = 0.1;
-double DIST_INCREMENT = 1;
+double TIME_INCREMENT = 0.05;
+double DIST_INCREMENT = .5;
 int TICKS = 0;
 double FINAL_OFFSET_X;
 double FINAL_OFFSET_Y;
@@ -46,6 +46,10 @@ double TEMP_OFFSET;
 
 uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
 bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
+
+//encoder states
+int aState;
+int aLastState;
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
@@ -85,8 +89,6 @@ void setup() {
   STATE = INIT;
 
   Serial.begin(115200);
-  Serial.println(SDA);
-  Serial.println(SCL);
   Wire.begin(17, 18);
   Wire.setClock(400000L);
 
@@ -97,17 +99,28 @@ void setup() {
   pinMode(BTN_3, INPUT);
   pinMode(INCR_BTN, INPUT);
 
+  pinMode(INCR_A, INPUT);
+  pinMode(INCR_B, INPUT);
+
+  aLastState = digitalRead(INCR_A);
+
   pinMode(STEP_ENABLE, OUTPUT);
   digitalWrite(STEP_ENABLE, HIGH);
 
   pinMode(LED_0, OUTPUT);
   pinMode(LED_1, OUTPUT);
   pinMode(LASERS, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);
 
-  attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
+  //setting vref voltage
+  Wire.beginTransmission(DAC_ADDRESS);
+  Wire.write(0x00);
+  Wire.write (73);
+  Wire.endTransmission();
+
 
   //oled init
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
@@ -115,26 +128,26 @@ void setup() {
   SCREEN.display();
   STATE = INIT;
   displayScreen(STATE);
-  Serial.println("1");
+  //Serial.println("1");
   gyroInit();
 
 
   //sd init
-  Serial.println("2");
+  //Serial.println("2");
   SPI.begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
-  if (!SD.begin(41, SPI)) {
+  if (!SD.begin(SD_CS, SPI)) {
     Serial.println("SD Initialization failed!");
   } else {
     Serial.println("SD Initialization good!");
   }
-  Serial.println("3");
+  //Serial.println("3");
   //load Paths
   if (!loadPathFromSD(SD)) {
     STATE = FILE_ERROR;
     displayScreen(STATE);
   }
 
-  Serial.println("4");
+  //Serial.println("4");
 
   if (STATE == INIT) {
     Serial.println("init successful");
@@ -149,9 +162,12 @@ void setup() {
   if (PATH_MODE == 3) {
     testDist();
   }
+  //digitalWrite(BUZZER, HIGH);
 }
 
 void loop() {
+  robotController.updateTheta();
+  Serial.println(robotController.getTheta());
   switch (STATE) {
     case INIT:
       break;
@@ -169,7 +185,6 @@ void loop() {
       }
       if (BTN_STATE(2)) {
         STATE = ADJUST_MENU;
-        displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
         digitalWrite(LASERS, !digitalRead(LASERS));
@@ -219,80 +234,137 @@ void loop() {
       }
       break;
     case ADJUST_MENU:
-      TICKS = 0;
-      STATE = ADJUST_TIME;
-      break;
-    case ADJUST_TIME:
+      TICKS = (int)(TIME_OFFSET / TIME_INCREMENT);
       TEMP_OFFSET = TICKS * TIME_INCREMENT;
-      if (BTN_STATE(1)) {
-        STATE = IDLE;
-      }
-      if (BTN_STATE(0)) {
-        STATE = ADJUST_TIME;
-        TICKS = 0;
-        TIME_OFFSET = 0;
-      }
-      if (BTN_STATE(2)) {
-        STATE = ADJUST_X;
-        TICKS = 0;
-      }
-      if (BTN_STATE(3)) {
-        STATE = ADJUST_Y;
-        TICKS = 0;
-      }
-      if (BTN_STATE(4)) {
-        TIME_OFFSET = TEMP_OFFSET;
-      }
-      delay(100);
+      STATE = ADJUST_TIME;
       displayScreen(STATE);
       break;
+    case ADJUST_TIME:
+      aState = digitalRead(INCR_A);
+      if (aState != aLastState) {
+        if (digitalRead(INCR_B) != aState) {
+          TICKS++;
+        } else {
+          TICKS--;
+        }
+        //Serial.println(TEMP_OFFSET);
+        //Serial.println(TIME_OFFSET);
+        TEMP_OFFSET = TICKS * TIME_INCREMENT;
+        displayScreen(STATE);
+      }
+      aLastState = aState;
+      TEMP_OFFSET = TICKS * TIME_INCREMENT;
+      if (BTN_STATE(1)) {
+        //Serial.println("BUTTON 1");
+        STATE = IDLE;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(0)) {
+        //Serial.println("BUTTON 0");
+        TICKS = 0;
+        STATE = ADJUST_TIME;
+        TEMP_OFFSET = TICKS * TIME_INCREMENT;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(2)) {
+        //Serial.println("BUTTON 2");
+        TICKS = (int)(FINAL_OFFSET_X / DIST_INCREMENT);
+        STATE = ADJUST_X;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        //Serial.println("BUTTON 3");
+        TICKS = (int)(FINAL_OFFSET_Y / DIST_INCREMENT);
+        STATE = ADJUST_Y;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(4)) {
+        //Serial.println("ENCODER BUTTON");
+        TIME_OFFSET = TEMP_OFFSET;
+        displayScreen(STATE);
+      }
+      break;
     case ADJUST_X:
+      aState = digitalRead(INCR_A);
+      if (aState != aLastState) {
+        if (digitalRead(INCR_B) != aState) {
+          TICKS++;
+        } else {
+          TICKS--;
+        }
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
+      }
+      aLastState = aState;
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
+        displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
+        TICKS = (int)(TIME_OFFSET / TIME_INCREMENT);
         STATE = ADJUST_TIME;
-        TICKS = 0;
+        TEMP_OFFSET = TICKS * TIME_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(2)) {
-        STATE = ADJUST_X;
         TICKS = 0;
-        FINAL_OFFSET_X = 0;
+        STATE = ADJUST_X;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
+        TICKS = (int)(FINAL_OFFSET_Y / DIST_INCREMENT);
         STATE = ADJUST_Y;
-        TICKS = 0;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         FINAL_OFFSET_X = TEMP_OFFSET;
+        displayScreen(STATE);
       }
-      delay(100);
-      displayScreen(STATE);
       break;
     case ADJUST_Y:
+      aState = digitalRead(INCR_A);
+      if (aState != aLastState) {
+        if (digitalRead(INCR_B) != aState) {
+          TICKS++;
+        } else {
+          TICKS--;
+        }
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
+      }
+      aLastState = aState;
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
       if (BTN_STATE(1)) {
         STATE = IDLE;
+        displayScreen(STATE);
       }
       if (BTN_STATE(0)) {
+        TICKS = (int)(TIME_OFFSET / TIME_INCREMENT);
         STATE = ADJUST_TIME;
-        TICKS = 0;
+        TEMP_OFFSET = TICKS * TIME_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(2)) {
+        TICKS = (int)(FINAL_OFFSET_X / DIST_INCREMENT);
         STATE = ADJUST_X;
-        TICKS = 0;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
-        STATE = ADJUST_Y;
         TICKS = 0;
-        FINAL_OFFSET_Y = 0;
+        STATE = ADJUST_Y;
+        TEMP_OFFSET = TICKS * DIST_INCREMENT;
+        displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         FINAL_OFFSET_Y = TEMP_OFFSET;
+        displayScreen(STATE);
       }
-      delay(100);
-      displayScreen(STATE);
       break;
     case SD_ERROR:
       break;
@@ -577,12 +649,13 @@ bool BTN_STATE(uint8_t index) {
   if (buttonstate != BTN_PREV_STATES[index]) {
     BTN_PREV_STATES[index] = buttonstate;
     if (buttonstate == HIGH) {
+      delay(100);
       return true;
     }
   }
   return false;
 }
-//Interrupts
+//Interrupts not used
 void encoderInterruptHandlerA() {
   if (digitalRead(INCR_A) != digitalRead(INCR_B)) {
     TICKS--;
@@ -731,7 +804,7 @@ void displayScreen(int state) {
       SCREEN.print("X OFF");
       SCREEN.setTextSize(1);
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
-      if (TEMP_OFFSET = FINAL_OFFSET_X) {
+      if (TEMP_OFFSET == FINAL_OFFSET_X) {
         SCREEN.print("SAVED");
       } else {
         SCREEN.print("UNSAVED");
@@ -758,7 +831,7 @@ void displayScreen(int state) {
       SCREEN.print("Y OFF");
       SCREEN.setTextSize(1);
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
-      if (TEMP_OFFSET = FINAL_OFFSET_Y) {
+      if (TEMP_OFFSET == FINAL_OFFSET_Y) {
         SCREEN.print("SAVED");
       } else {
         SCREEN.print("UNSAVED");
@@ -786,10 +859,16 @@ void displayScreen(int state) {
       SCREEN.print("TIME OFF");
       SCREEN.setTextSize(1);
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 20);
-      if (TEMP_OFFSET = TIME_OFFSET) {
+      //Serial.print(TEMP_OFFSET);
+      //Serial.println(" temp in display method");
+      //Serial.print(TIME_OFFSET);
+      //Serial.println(" time in display method");
+      if (TEMP_OFFSET == TIME_OFFSET) {
         SCREEN.print("SAVED");
+        //Serial.println("SAVED");
       } else {
         SCREEN.print("UNSAVED");
+        //Serial.println("UNSAVED");
       }
       SCREEN.setTextSize(2);
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 28);
@@ -798,4 +877,5 @@ void displayScreen(int state) {
       break;
   }
   SCREEN.display();
+  //Serial.println("SCREEN REFRESH");
 }
