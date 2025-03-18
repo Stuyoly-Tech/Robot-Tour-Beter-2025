@@ -3,57 +3,68 @@
 
 #include <Arduino.h>
 #include <ArduinoEigenDense.h>
+
 using namespace Eigen;
 
 //Gets points and tells distances/required headings
 
 class simplePursuit {
   private:
-    Vector2d *path;
-    Vector2d *gates;
+    Vector2f *path;
+    Vector2f *gates;
 
-    uint8_t pathSize;
-    uint8_t gateSize;
-    uint8_t prevPointIndex;
-    uint8_t currentGoalPointIndex;
+    int pathSize;
+    int gateSize;
+    int prevPointIndex;
+    int currentGoalPointIndex;
 
-    double centerToDowel; 
-    double pathTotalDist; 
-    double targetTime;
+    float centerToDowel; 
+    float pathTotalDist; 
+    float targetTime;
 
-    double finalOffsetX;
-    double finalOffsetY;
+    float finalOffsetX;
+    float finalOffsetY;
 
-    //Calculated at init()
-    double avgVx;
+    float avgVx;
+
     //Time alloted for each turn, used to calculate avgVx
 
     //in us
     uint32_t turnInterval;
-    double limitVx;
-    double getDist(Vector2d p1, Vector2d p2);
+
+    float limitVx;
+    float limitOmega;
+    
+    float getDist(Vector2f p1, Vector2f p2);
     
   public:
-    simplePursuit(double iLimitVx, double iCenterToDowel);
+    simplePursuit(float iLimitVx, float iLimitOmega, float iCenterToDowel);
     
-    void init(Vector2d *iPath, uint8_t iPathSize, Vector2d *iGates, uint8_t iGateSize, double iTargetTime, double iFinalOffsetY, double iFinalOffsetX);
+    void init(
+      Vector2f *iPath, int iPathSize, 
+      Vector2f *iGates, int iGateSize, 
+      float iTargetTime, 
+      float iFinalOffsetY, float iFinalOffsetX
+    );
 
     //get index of path
-    uint8_t getPathIndexCount();
+    int getPathIndexCount();
 
     //True if not the end of the path, false if it is
     void nextPoint();
+
+    //Stuff
     boolean atLastPoint();
     boolean isAGate();
 
     //Distance needed to be traveled from point a to b
-    double getCurrentGoalPointDist();
+    float getCurrentGoalPointDist();
+
     //Requried heading to go from point a to b
-    double getTheta();
+    float getTheta();
 
     //Average speed needed to complete track on time
-    double getAvgVx(uint32_t elapsedTime);
-
+    float getAvgVx(uint32_t elapsedTime);
 };
 
 #endif

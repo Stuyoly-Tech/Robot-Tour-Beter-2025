@@ -1,26 +1,6 @@
-//Hardware connections
+#ifdef CONFIG__H
+#define CONFIG__H
 
-//Buttons for input(0 and 1 are swapped from pcb labeling)
-#define BTN_0 2 //INIT | x
-#define BTN_1 1 //RUN | TIME ADJUST
-#define BTN_2 3 //ADJUSTMENTS | X ADJUST
-#define BTN_3 4 //LASERS | Y ADJUST
-
-//Rotary Encoder
-#define INCR_BTN 5
-#define INCR_A 15
-#define INCR_B 16
-
-#define BUZZER 8
-
-//Motors
-#define STEP_L 21
-#define DIR_L 14
-
-#define STEP_R 11
-#define DIR_R 10
-
-#define STEP_ENABLE 9
 #define VREF_VOLTAGE 0.9447
 #define DAC_ADDRESS 0x0D
 #define STEPS_PER_REV 200*8//microsteps are controlled by dipswitch
@@ -31,19 +11,6 @@
 #define OLED_RESET -1 
 #define SCREEN_ADDRESS 0x3C
 #define SCREEN_WIRE &Wire
-
-//LASERS
-#define LASERS 42
-
-//LEDS
-#define LED_0 6
-#define LED_1 7
-
-//SD Card
-#define SD_CS 41
-#define SD_CLK 38
-#define SD_MOSI 40
-#define SD_MISO 39
 
 //BMI160 IMU
 #define IMU_ADDRESS 0x68
@@ -69,7 +36,6 @@
 //Not used
 #define TURN_US 2500*pow(10, 3)
 
-
 //PATH INFO
 #define PATH_FILE "/path.txt"
 
@@ -87,3 +53,5 @@
 #define ADJUST_X 9
 #define ADJUST_Y 10
 #define ADJUST_TIME 11
+
+#endif
