@@ -111,22 +111,18 @@ void setup() {
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);
 
+  //oled init
+  SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+  SCREEN.clearDisplay();
+  SCREEN.setTextSize(2);
+  SCREEN.print("INIT...");
+  SCREEN.display();
+
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
   Wire.write(73);
   Wire.write(73);
   Wire.endTransmission();
-
-
-  //oled init
-  SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
-  SCREEN.clearDisplay();
-  SCREEN.display();
-  STATE = INIT;
-  displayScreen(STATE);
-  //Serial.println("1");
-  gyroInit();
-
 
   //sd init
   //Serial.println("2");
@@ -175,7 +171,6 @@ void loop() {
       if (BTN_STATE(1)) {
         STATE = INIT;
         displayScreen(STATE);
-        gyroInit();
         Robot.init(PATH_MODE);
         robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
@@ -189,6 +184,13 @@ void loop() {
       if (BTN_STATE(3)) {
         digitalWrite(LASERS, !digitalRead(LASERS));
         digitalWrite(LED_1, !digitalRead(LED_1));
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(4)) {
+        STATE = INIT;
+        displayScreen(STATE);
+        gyroInit();
+        STATE = READY;
         displayScreen(STATE);
       }
       break;
@@ -206,6 +208,18 @@ void loop() {
         STATE = IDLE;
         digitalWrite(STEP_ENABLE, HIGH);
         digitalWrite(LED_0, LOW);
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(3)) {
+        digitalWrite(LASERS, !digitalRead(LASERS));
+        digitalWrite(LED_1, !digitalRead(LED_1));
+        displayScreen(STATE);
+      }
+      if (BTN_STATE(4)) {
+        STATE = INIT;
+        displayScreen(STATE);
+        gyroInit();
+        STATE = READY;
         displayScreen(STATE);
       }
       break;
@@ -655,9 +669,10 @@ void displayScreen(int state) {
   SCREEN.setTextColor(SSD1306_WHITE);
   switch (state) {
     case INIT:
-      SCREEN.setTextSize(1);
+      SCREEN.setTextSize(2);
       SCREEN.setCursor(1, 1);
-      SCREEN.print("INIT: DON'T MOVE");
+      SCREEN.println("INIT GYRO");
+      SCREEN.print("DON'T MOVE");
       break;
     case IDLE:
       //Button Letters
