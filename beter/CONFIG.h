@@ -22,7 +22,7 @@
 
 #define STEP_ENABLE 9
 #define VREF_VOLTAGE 0.9447
-#define DAC_ADDRESS 0x48
+#define DAC_ADDRESS 0x0D
 #define STEPS_PER_REV 200*8//microsteps are controlled by dipswitch
 
 //Screen
@@ -33,7 +33,7 @@
 #define SCREEN_WIRE &Wire
 
 //LASERS
-#define LASERS 45
+#define LASERS 42
 
 //LEDS
 #define LED_0 6

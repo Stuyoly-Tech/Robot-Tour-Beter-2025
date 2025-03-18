@@ -36,8 +36,8 @@ double TARGET_TIME;
 
 int PATH_MODE;
 
-double TIME_INCREMENT = 0.05;
-double DIST_INCREMENT = .5;
+double TIME_INCREMENT = 0.1;
+double DIST_INCREMENT = 1;
 int TICKS = 0;
 double FINAL_OFFSET_X;
 double FINAL_OFFSET_Y;
@@ -46,10 +46,6 @@ double TEMP_OFFSET;
 
 uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
 bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
-
-//encoder states
-int aState;
-int aLastState;
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
@@ -99,10 +95,10 @@ void setup() {
   pinMode(BTN_3, INPUT);
   pinMode(INCR_BTN, INPUT);
 
+  attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
+  //attachInterrupt(digitalPinToInterrupt(INCR_B), encoderInterruptHandlerB, RISING);
   pinMode(INCR_A, INPUT);
   pinMode(INCR_B, INPUT);
-
-  aLastState = digitalRead(INCR_A);
 
   pinMode(STEP_ENABLE, OUTPUT);
   digitalWrite(STEP_ENABLE, HIGH);
@@ -117,8 +113,7 @@ void setup() {
 
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
-  Wire.write(0x00);
-  Wire.write (73);
+  Wire.write(73);
   Wire.endTransmission();
 
 
@@ -166,8 +161,12 @@ void setup() {
 }
 
 void loop() {
-  robotController.updateTheta();
-  Serial.println(robotController.getTheta());
+  //Serial.print("A STATE: ");
+  //Serial.println(digitalRead(INCR_A));
+  //Serial.print("B STATE: ");
+  //Serial.println(digitalRead(INCR_B));
+  //robotController.updateTheta();
+  //Serial.println(robotController.getTheta());
   switch (STATE) {
     case INIT:
       break;
@@ -213,10 +212,14 @@ void loop() {
       Robot.update();
       if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
         STATE = STOPPED;
+        digitalWrite(LED_0, LOW);
+        digitalWrite(LED_1, LOW);
         displayScreen(STATE);
       }
       if (Robot.getState() == 0) {
         STATE = END_RUN;
+        digitalWrite(LED_0, LOW);
+        digitalWrite(LED_1, LOW);
         displayScreen(STATE);
       }
       break;
@@ -240,20 +243,10 @@ void loop() {
       displayScreen(STATE);
       break;
     case ADJUST_TIME:
-      aState = digitalRead(INCR_A);
-      if (aState != aLastState) {
-        if (digitalRead(INCR_B) != aState) {
-          TICKS++;
-        } else {
-          TICKS--;
-        }
-        //Serial.println(TEMP_OFFSET);
-        //Serial.println(TIME_OFFSET);
-        TEMP_OFFSET = TICKS * TIME_INCREMENT;
-        displayScreen(STATE);
-      }
-      aLastState = aState;
+      //Serial.println(TEMP_OFFSET);
+      //Serial.println(TIME_OFFSET);
       TEMP_OFFSET = TICKS * TIME_INCREMENT;
+      displayScreen(STATE);
       if (BTN_STATE(1)) {
         //Serial.println("BUTTON 1");
         STATE = IDLE;
@@ -287,18 +280,8 @@ void loop() {
       }
       break;
     case ADJUST_X:
-      aState = digitalRead(INCR_A);
-      if (aState != aLastState) {
-        if (digitalRead(INCR_B) != aState) {
-          TICKS++;
-        } else {
-          TICKS--;
-        }
-        TEMP_OFFSET = TICKS * DIST_INCREMENT;
-        displayScreen(STATE);
-      }
-      aLastState = aState;
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
+      displayScreen(STATE);
       if (BTN_STATE(1)) {
         STATE = IDLE;
         displayScreen(STATE);
@@ -327,18 +310,8 @@ void loop() {
       }
       break;
     case ADJUST_Y:
-      aState = digitalRead(INCR_A);
-      if (aState != aLastState) {
-        if (digitalRead(INCR_B) != aState) {
-          TICKS++;
-        } else {
-          TICKS--;
-        }
-        TEMP_OFFSET = TICKS * DIST_INCREMENT;
-        displayScreen(STATE);
-      }
-      aLastState = aState;
       TEMP_OFFSET = TICKS * DIST_INCREMENT;
+      displayScreen(STATE);
       if (BTN_STATE(1)) {
         STATE = IDLE;
         displayScreen(STATE);
@@ -655,12 +628,16 @@ bool BTN_STATE(uint8_t index) {
   }
   return false;
 }
-//Interrupts not used
+
 void encoderInterruptHandlerA() {
+  //Serial.print("A STATE: ");
+  //Serial.println(digitalRead(INCR_A));
+  //Serial.print("B STATE: ");
+  //Serial.println(digitalRead(INCR_B));
   if (digitalRead(INCR_A) != digitalRead(INCR_B)) {
-    TICKS--;
-  } else {
     TICKS++;
+  } else {
+    TICKS--;
   }
 }
 
