@@ -114,6 +114,7 @@ void setup() {
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
   Wire.write(73);
+  Wire.write(73);
   Wire.endTransmission();
 
 

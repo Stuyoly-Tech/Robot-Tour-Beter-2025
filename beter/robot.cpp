@@ -36,7 +36,7 @@ void robot::update() {
   double theta;
   double deltaTheta;
   double vx;
-  Serial.println(STATE);
+  //Serial.println(STATE);
   switch (STATE) {
     case 0:
       break;
@@ -98,7 +98,7 @@ void robot::update() {
         STATE = 1;
       }
       else {
-        Serial.println("UPDATE");
+        //Serial.println("UPDATE");
         robotController->update();
       }
       break;
