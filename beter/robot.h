@@ -14,26 +14,18 @@ class robot {
     //2 for moving
     //3 for deciding turn
     //4 for turning
-    uint8_t STATE;
-    uint32_t start_us;
+    int state;
+
+    float t_0;
 
     //getting distance from end point
     float centerToDowel;
-
-    float maxAx;
-    float maxAngAx;
-    float maxAngVx;
-
     int pathMode;
 
     float sgn(float n);
     
   public:
-    robot( 
-      simplePursuit *iSimplePursuit, controller *iController,
-      float iMaxAx, float iMaxAngAx, float iMaxAngVx,
-      float iCenterToDowel
-      );
+    robot(simplePursuit *iSimplePursuit, controller *iController);
       
     void init();
     void init(int iPathMode);
@@ -41,7 +33,7 @@ class robot {
     void startPath();
     float stopPath();
 
-    uint8_t getState();
+     getState();
 
 };
 

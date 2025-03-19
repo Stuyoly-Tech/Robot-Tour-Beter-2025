@@ -80,8 +80,8 @@ float simplePursuit::getTheta() {
     );
 }
 
-float simplePursuit::getAvgVx(uint32_t elapsedTime) {
-  float remTime = targetTime - (elapsedTime/pow(10, 6));
+float simplePursuit::getAvgVx(float t) {
+  float remTime = targetTime - t;
   avgVx = pathTotalDist/remTime;
   if ((avgVx > limitVx) || (remTime < 0)) {
     avgVx = limitVx;
