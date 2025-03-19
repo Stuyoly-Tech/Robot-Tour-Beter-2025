@@ -30,7 +30,7 @@ void Controller::init(float iTheta) {
   thetaSetPoint = iTheta;
 }
 
-void controller::init() {
+void Controller::init() {
   //init steppers
   steppersEngaged_mtx->lock();
   stepperL->setPinsInverted(true);
@@ -46,12 +46,12 @@ void controller::init() {
   t_0 = micros()/pow(10, 6);
 }
 
-void controller::update() {
+void Controller::update() {
   updateTheta();
-  double deltaTheta = targetTheta - theta;
+  float deltaTheta = thetaSetPoint - theta;
   //Serial.println(deltaTheta);
   //Serial.println(theta*180/PI);
-  switch (STATE) {
+  switch (state) {
     case 0:
       break;
 
@@ -59,7 +59,7 @@ void controller::update() {
       //stepperL->run();
       //stepperR->run();
       if (steppersEngaged_mtx->try_lock()) {
-        STATE = 0;
+        state = 0;
         steppersEngaged_mtx->unlock();
       }
       break;
@@ -71,22 +71,23 @@ void controller::update() {
       } else if (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-      if (abs(targetTheta - theta) < 0.001) {
+      if (abs(thetaSetPoint - theta) < 0.001) {
         steppersEngaged_mtx->lock();
         stepperL->setCurrentPosition(stepperL->targetPosition());
         stepperR->setCurrentPosition(stepperR->targetPosition());
         steppersEngaged_mtx->unlock();
-        STATE = 0;
-      } else {
+        state = 0;
+      } 
+      else {
+        int steps = mm_to_steps(0.5*TRACK_WIDTH*deltaTheta, WHEEL_RADIUS, STEPS_PER_REV);
         steppersEngaged_mtx->lock();
         stepperL->setCurrentPosition(stepperL->targetPosition());
         stepperR->setCurrentPosition(stepperR->targetPosition());
-        stepperL->move(mmToSteps(-0.5 * trackWidth * deltaTheta));
-        stepperR->move(mmToSteps(0.5 * trackWidth * deltaTheta));
+        stepperL->move(-steps);
+        stepperR->move(steps);
         steppersEngaged_mtx->unlock();
         xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
-        delay(20);
-        STATE = 3;
+        state = 3;
       }
       break;
 
@@ -94,7 +95,7 @@ void controller::update() {
     case 3:
       if (steppersEngaged_mtx->try_lock()) {
         if (!stepperL->isRunning() && !stepperR->isRunning()) {
-          STATE = 2;
+          state = 2;
         }
         //Serial.println("Done with movement");
         steppersEngaged_mtx->unlock();
@@ -102,31 +103,32 @@ void controller::update() {
       break;
 
     default:
-      STATE = 0;
+      state = 0;
       break;
   }
 }
 
-void controller::updateTheta() {
-  //micros() - oldIMUus > intervalIMUus
-  if (micros() - oldIMUus > intervalIMUus) {
-    imu1.getSensorData();
-    imu2.getSensorData();
-    double angVel = (imu1.data.gyroZ + imu2.data.gyroZ) * PI / 360;
-    //Serial.print("angvel: ");
-    //Serial.println(angVel, 10);
-    double interval = micros() - oldIMUus;
-    double dtheta = angVel * (interval / pow(10, 6));
-    if (abs(angVel) > highPassFreq) {
+void Controller::updateTheta() {
+  float t_now = micros()/pow(10, 6);
+  if (t_now - t_0 > IMU_UPDATE_PERIOD) {
+    //Update theta
+    imu0->getSensorData();
+    imu1->getSensorData();
+    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360;
+    float dTheta = omega*(t_now - t_0);
+
+    //Filter
+    if (abs(omega) > HIGH_PASS_FREQ) {
       theta += dtheta;
     }
+
+    //Rescale theta 
     while (theta > PI) {
       theta -= TWO_PI;
     }
     while (theta < -PI) {
       theta += TWO_PI;
     }
-    oldIMUus = micros();
   }
 }
 
