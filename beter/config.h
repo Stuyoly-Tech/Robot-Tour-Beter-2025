@@ -17,12 +17,12 @@
 //BMI160 IMU
 #define IMU0_ADDRESS 0x68
 #define IMU1_ADDRESS 0x69
-#define IMU_UPDATE_PERIOD 0.10*pow(10, 3)
+#define IMU_UPDATE_PERIOD 1.0/200
 
 //Robot physical dimensions
 //in mm
-#define WHEEL_RADIUS 40
-#define TRACK_WIDTH 116
+#define WHEEL_RADIUS 59.67/2
+#define TRACK_WIDTH 116.95
 #define DIST_TO_DOWEL 33.175
 
 //Kinematics
@@ -32,11 +32,11 @@
 #define MAX_VEL 1
 
 //in rad/sec
-#define MAX_ANG_ACC 0.5
-#define MAX_ANG_VEL 0.5
+#define MAX_ANG_ACC 6
+#define MAX_ANG_VEL 12
 
 //Filter for angular velocity drift
-#define HIGH_PASS_FREQ 13*pow(10, -3)//11.2051109*pow(10, -3) //Best value found so far
+#define HIGH_PASS_FREQ 0.00266
 //2.5*pow(10, -6)
 
 //PATH INFO

@@ -93,8 +93,6 @@ void setup() {
   pinMode(BTN_3, INPUT);
   pinMode(INCR_BTN, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
-  //attachInterrupt(digitalPinToInterrupt(INCR_B), encoderInterruptHandlerB, RISING);
   pinMode(INCR_A, INPUT);
   pinMode(INCR_B, INPUT);
 
@@ -135,8 +133,16 @@ void setup() {
   Wire.write(73);
   Wire.endTransmission();
 
+  //Init Gyros
+  STATE = INIT;
+  displayScreen(STATE);
+  ROBOTCONTROLLER.gyroInit();
+
+
+  attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
+
   //sd init
-  //Serial.println("2");
+  //Serial.println("2");  gyroOffset = 0;
   SPI.begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
   if (!SD.begin(SD_CS, SPI)) {
     Serial.println("SD Initialization failed!");
@@ -169,12 +175,6 @@ void setup() {
 }
 
 void loop() {
-  //Serial.print("A STATE: ");
-  //Serial.println(digitalRead(INCR_A));
-  //Serial.print("B STATE: ");
-  //Serial.println(digitalRead(INCR_B));
-  //robotController.updateTheta();
-  //Serial.println(robotController.getTheta());
   switch (STATE) {
     case INIT:
       break;

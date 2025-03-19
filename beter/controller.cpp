@@ -49,19 +49,51 @@ void Controller::init() {
 }
 
 void Controller::gyroInit() {
+  //Configure IMUs
+  /*
+  bmi2_sens_config gyroConfig;
+  gyroConfig.type = BMI2_GYRO;
+  gyroConfig.cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
+  gyroConfig.cfg.gyr.bwp = BMI2_GYR_OSR4_MODE;
+  gyroConfig.cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
+  gyroConfig.cfg.gyr.ois_range = BMI2_GYR_OIS_250;
+  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_125;
+  gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
+
+  imu0->setConfig(gyroConfig);
+  imu1->setConfig(gyroConfig);
+  */
   imu0->beginI2C(IMU0_ADDRESS);
   imu0->performComponentRetrim();
   imu0->performGyroOffsetCalibration();
+
   imu1->beginI2C(IMU1_ADDRESS);
   imu1->performComponentRetrim();
   imu1->performGyroOffsetCalibration();
+
+  float sum = 0;
+  t_0 = micros()/pow(10, 6);
+  //Begin reading
+  for (int i=0; i<100; ) {
+    float t = micros()/pow(10, 6);
+    if (t - t_0 > IMU_UPDATE_PERIOD) {
+      imu0->getSensorData();
+      imu1->getSensorData();
+      float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0;
+      sum += omega;
+      t_0 = t;
+      i++;
+    }
+  }
+  gyroOffset = sum/100;
 }
+
 
 void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
-  debugSerial->println(deltaTheta);
-  debugSerial->println(theta*180/PI);
+  //debugSerial->println(deltaTheta);
+  debugSerial->println(theta);
   switch (state) {
     case 0:
       break;
@@ -125,14 +157,17 @@ void Controller::updateTheta() {
     //Update theta
     imu0->getSensorData();
     imu1->getSensorData();
-    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360;
+
+    //debugSerial->printf("IMU0: %f, IMU1: %f\n", imu0->data.gyroZ, imu1->data.gyroZ);
+    
+    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0 - gyroOffset;
+
+    //debugSerial->printf("OMEGA: %f\n", omega);
+
     float dTheta = omega*(t_now - t_0);
 
     //Filter
-    //if (abs(omega) > HIGH_PASS_FREQ) {
-      if (1) {
-      theta += dTheta;
-    }
+    theta += dTheta;
 
     //Rescale theta 
     while (theta > PI) {
@@ -141,6 +176,8 @@ void Controller::updateTheta() {
     while (theta < -PI) {
       theta += TWO_PI;
     }
+
+    t_0 = micros()/pow(10, 6);
   }
 }
 
