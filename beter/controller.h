@@ -1,92 +1,59 @@
-#ifndef controller_h
-#define controller_h
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
 #include <mutex>
-
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include "SparkFun_BMI270_Arduino_Library.h"
-#include "CONFIG.h"
+#include <SparkFun_BMI270_Arduino_Library.h>
 
-void gyroInit();
-extern BMI270 imu1;
-extern BMI270 imu2;
+#include "utils.h"
+#include "config.h"
 
-class controller {
+class Controller {
   private:
-    //int mm
-    double wheelRadius;
-    double trackWidth;
+    //IMU
+    BMI270 *imu0;
+    BMI270 *imu1;
 
-    //All in mm/s
-    double maxVx;
-    double maxAx;
-
-    //Rad/s
-    double maxAngVx;
-    double maxAngAx;
-    
-    uint32_t oldus;
-    uint32_t oldIMUus;
-    uint32_t intervalIMUus;
-    
-    volatile double theta;
-    double targetTheta;
-    
+    //Motors
     AccelStepper *stepperL;
     AccelStepper *stepperR;
-    uint32_t stepsPerRev;
-
-    uint32_t turnInterval;
-
-    double highPassFreq;
-    
-    //0 is idle
-    //1 is moving
-    int STATE;
 
     std::mutex *steppersEngaged_mtx;
     void (*engageSteppers)(void * parameter);
     TaskHandle_t *engageSteppersHandle;
 
+    //Kinematics
+    float theta;
+    float thetaSetPoint;
+
+    float vx;
+
+    //Control variables (mostly for P controller on theta)
+    float t_0;
+    int state;
+
   public:
-    controller(
-      double iWheelRadius, double iTrackWidth,
-      AccelStepper *iStepperL, AccelStepper *iStepperR,
-      uint32_t iStepsPerRev, uint32_t iTurnInterval,
-      uint32_t iIntervalIMUussd, std::mutex *iSteppersEngaged_mtx,
-      void (*iEngageSteppers)(void * parameter),
-      TaskHandle_t *iEngageSteppersHandle,
-      double iHighPassFreq
+
+    Controller(
+      AccelStepper* pStepperL, AccelStepper* pStepperR,
+      std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
+      TaskHandle_t *iEngageSteppersHandle, 
+      BMI270* pImu0, BMI270* pImu1
     );
 
-    void init(double iTheta);
+    void init(float iTheta);
     void init();
+
     void update();
-
-    void setMaxVx(double newVx);
-    void setMaxAx(double newAx);
-    void setMaxAngAx(double newAngAx);
-    void setMaxAngVx(double newAngVx);
-
-    //Motion profiled
-    void moveX(double dist);
-    void setTheta(double newTheta);
     void updateTheta();
-    void initTheta(double newTheta);
 
-    double getMaxVx();
-    double getMaxAx();
-    double getMaxAngAx();
-    double getMaxAngVx();
+    void moveX(float dist);
+    void turnTheta(float targetTheta);
 
-    double getTheta();
-    double getTargetTheta();
+    void setVx(float newVx);
 
     int getState();
-
-    long mmToSteps(double mm);
-    double stepsTomm(long steps);
 };
 
 #endif

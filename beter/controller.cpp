@@ -1,51 +1,33 @@
 #include <mutex>
-
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include "CONFIG.h"
+#include <SparkFun_BMI270_Arduino_Library.h>
+
+#include "utils.h"
+#include "config.h"
 #include "controller.h"
-#include "SparkFun_BMI270_Arduino_Library.h"
 
-#define RIGHT_OFF 1.00
 
-BMI270 imu1;
-BMI270 imu2;
-
-void gyroInit() {
-  imu1.beginI2C(IMU_ADDRESS);
-  imu1.performComponentRetrim();
-  imu1.performGyroOffsetCalibration();
-  imu2.beginI2C(IMU2_ADDRESS);
-  imu1.performComponentRetrim();
-  imu1.performGyroOffsetCalibration();
-  Serial.println("GYRO INIT");
-}
-
-controller::controller(
-  double iWheelRadius, double iTrackWidth,
-  AccelStepper *iStepperL, AccelStepper *iStepperR,
-  uint32_t iStepsPerRev, uint32_t iTurnInterval,
-  uint32_t iIntervalIMUus, std::mutex *iSteppersEngaged_mtx,
-  void (*iEngageSteppers)(void *parameter),
-  TaskHandle_t *iEngageSteppersHandle,
-  double iHighPassFreq) {
-  wheelRadius = iWheelRadius;
-  trackWidth = iTrackWidth;
-  stepperL = iStepperL;
-  stepperR = iStepperR;
-  stepsPerRev = iStepsPerRev;
-  turnInterval = iTurnInterval;
-  intervalIMUus = iIntervalIMUus;
+controller::Controller(
+  AccelStepper* pStepperL, AccelStepper* pStepperR,
+  std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
+  TaskHandle_t *iEngageSteppersHandle, 
+  BMI270* pImu0, BMI270* pImu1
+) 
+{
+  stepperL = pStepperL;
+  stepperR = pStepperR;
   steppersEngaged_mtx = iSteppersEngaged_mtx;
   engageSteppers = iEngageSteppers;
   engageSteppersHandle = iEngageSteppersHandle;
-  highPassFreq = iHighPassFreq;
+  imu0 = pImu0;
+  imu1 = pImu1;
 }
 
-void controller::init(double iTheta) {
+void Controller::init(float iTheta) {
   init();
   theta = iTheta;
-  targetTheta = theta;
+  thetaSetPoint = iTheta;
 }
 
 void controller::init() {
@@ -55,15 +37,13 @@ void controller::init() {
   stepperL->setMinPulseWidth(2);
   stepperR->setMinPulseWidth(2);
   steppersEngaged_mtx->unlock();
+
   //init values
-  maxVx = 0;
-  maxAx = 0;
-  maxAngVx = 0;
-  oldus = micros();
-  oldIMUus = micros();
-  STATE = 0;
+  state = 0;
   theta = 0;
-  targetTheta = 0;
+  thetaSetPoint = 0;
+  vx = 0;
+  t_0 = micros()/pow(10, 6);
 }
 
 void controller::update() {
@@ -150,103 +130,82 @@ void controller::updateTheta() {
   }
 }
 
-long controller::mmToSteps(double mm) {
-  return (long)((mm / (TWO_PI * wheelRadius)) * stepsPerRev);
-}
+void Controller::moveX(float dist) {
+  if (dist != 0) {
+    int maxV = mm_to_steps(MAX_VEL, WHEEL_RADIUS, STEPS_PER_REV);
+    int maxA = mm_to_steps(MAX_ACC, WHEEL_RADIUS, STEPS_PER_REV);
+    int steps = mm_to_steps(dist, WHEEL_RADIUS, STEPS_PER_REV);
 
-double controller::stepsTomm(long steps) {
-  return (steps / stepsPerRev) * TWO_PI * wheelRadius;
-}
+    //Lock steppers
+    steppersEngaged_mtx->lock();
 
-void controller::setMaxVx(double newVx) {
-  maxVx = newVx;
-}
+    //set accel and vel
+    stepperL->setAcceleration(maxA);
+    stepperR->setAcceleration(maxA);
+    stepperL->setMaxSpeed(maxV);
+    stepperR->setMaxSpeed(maxV);
+    stepperL->setSpeed(maxV);
+    stepperR->setSpeed(maxV);
 
-void controller::setMaxAx(double newAx) {
-  maxAx = newAx;
-}
+    //set wheel positions
+    stepperL->move(steps);
+    stepperR->move(steps);
 
-void controller::setMaxAngAx(double newAngAx) {
-  maxAngAx = newAngAx;
-}
+    //Unlock steppers
+    steppersEngaged_mtx->unlock();
 
-void controller::setMaxAngVx(double newAngVx) {
-  maxAngVx = newAngVx;
-}
+    //Create task
+    xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
 
-void controller::moveX(double dist) {
-  if (dist == 0) {
-    return;
+    //Update state
+    STATE = 1;
   }
+}
+
+
+void Controller::turnTheta(float targetTheta) {
+  int maxOmega = mm_to_steps(MAX_ANG_VEL, WHEEL_RADIUS, STEPS_PER_REV)*WHEEL_RADIUS;
+  int maxAlpha = mm_to_steps(MAX_ANG_ACC, WHEEL_RADIUS, STEPS_PER_REV)*WHEEL_RADIUS;
+
+  //lock steppers 
   steppersEngaged_mtx->lock();
+
   //set accel and vel
-  stepperL->setAcceleration(mmToSteps(maxAx));
-  stepperR->setAcceleration(mmToSteps(maxAx * RIGHT_OFF));
-  stepperL->setMaxSpeed(mmToSteps(maxVx));
-  stepperR->setMaxSpeed(mmToSteps(maxVx * RIGHT_OFF));
-  stepperL->setSpeed(mmToSteps(maxVx));
-  stepperR->setSpeed(mmToSteps(maxVx * RIGHT_OFF));
+  stepperL->setAcceleration(maxAlpha);
+  stepperR->setAcceleration(maxAlpha);
+  stepperL->setMaxSpeed(maxOmega);
+  stepperR->setMaxSpeed(maxOmega);
+  stepperL->setSpeed(maxOmega);
+  stepperR->setSpeed(maxOmega);
+
   //set wheel positions
-  stepperL->move(mmToSteps(dist));
-  stepperR->move(mmToSteps(dist));
-  steppersEngaged_mtx->unlock();
-  xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
-  STATE = 1;
-}
-
-
-void controller::setTheta(double newTheta) {
-  //set accel and vel
-  steppersEngaged_mtx->lock();
-  stepperL->setAcceleration(mmToSteps(maxAngAx));
-  stepperR->setAcceleration(mmToSteps(maxAngAx * RIGHT_OFF));
-  stepperL->setMaxSpeed(mmToSteps(maxAngVx));
-  stepperR->setMaxSpeed(mmToSteps(maxAngVx * RIGHT_OFF));
-  stepperL->setSpeed(mmToSteps(maxAngVx));
-  stepperR->setSpeed(mmToSteps(maxAngVx * RIGHT_OFF));
-  //set wheel positions
-  targetTheta = newTheta;
-  while (targetTheta > PI) {
-    targetTheta -= TWO_PI;
+  thetaSetPoint = targetTheta;
+  
+  //Adjust to turn the right direction
+  while (thetaSetPoint > PI) {
+    thetaSetPoint -= TWO_PI;
   }
-  while (targetTheta < -PI) {
-    targetTheta += TWO_PI;
+  while (thetaSetPoint < -PI) {
+    thetaSetPoint += TWO_PI;
   }
+  
+  //Unlock
   steppersEngaged_mtx->unlock();
+
+  //Create task
   xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
-  oldus = micros();
-  STATE = 2;
+
+  //Update time
+  t_0 = micros()/pow(10, 6);
+
+  //Change state
+  state = 2;
 }
 
-double controller::getMaxVx() {
-  return maxVx;
+void Controller::setVx(float newVx) {
+  vx = newVx;
 }
 
-double controller::getMaxAx() {
-  return maxAx;
-}
-
-double controller::getMaxAngVx() {
-  return maxAngVx;
-}
-
-double controller::getMaxAngAx() {
-  return maxAngAx;
-}
-
-double controller::getTheta() {
-  return theta;
-}
-
-double controller::getTargetTheta() {
-  return targetTheta;
-}
-
-void controller::initTheta(double newTheta) {
-  //theta = newTheta;
-  return;
-}
-
-int controller::getState() {
-  return STATE;
+void Controller::getState() {
+  return state;
 }

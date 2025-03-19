@@ -1,9 +1,11 @@
 #ifdef CONFIG__H
 #define CONFIG__H
 
+//DAC
 #define VREF_VOLTAGE 0.9447
 #define DAC_ADDRESS 0x0D
-#define STEPS_PER_REV 200*8//microsteps are controlled by dipswitch
+
+#define STEPS_PER_REV 200*8 //microsteps are controlled by dipswitch
 
 //Screen
 #define SCREEN_WIDTH 128
@@ -23,18 +25,19 @@
 #define TRACK_WIDTH 116
 #define DIST_TO_DOWEL 33.175
 
-//Controller tuning values
+//Kinematics
 
-#define MAX_ACCEL 700
-#define MAX_VX 8000
+//in mm/s
+#define MAX_ACC 1
+#define MAX_VEL 1
 
-#define MAX_ANG_ACCEL 300
+//in rad/sec
+#define MAX_ANG_ACC 300
 #define MAX_ANG_VEL 325
 
+//Filter for angular velocity drift
 #define HIGH_PASS_FREQ 13*pow(10, -3)//11.2051109*pow(10, -3) //Best value found so far
 //2.5*pow(10, -6)
-//Not used
-#define TURN_US 2500*pow(10, 3)
 
 //PATH INFO
 #define PATH_FILE "/path.txt"

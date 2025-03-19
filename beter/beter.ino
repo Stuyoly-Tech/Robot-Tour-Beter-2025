@@ -1,24 +1,24 @@
-#include <mutex>
-#include <esp_task_wdt.h>
+//Henryiscool
 
-#include "CONFIG.h"
+#include <mutex>
+#include <Wire.h>
+#include <FS.h>
+#include <SPI.h>
+#include <SD.h>
+#include <esp_task_wdt.h>
 #include <AccelStepper.h>
+#include <ArduinoEigenDense.h>
+#include <Adafruit_SSD1306.h>
+#include <SparkFun_BMI270_Arduino_Library.h>
+
+#include "pinout.h"
+#include "config.h"
+#include "utils.h"
 #include "controller.h"
 #include "simplePursuit.h"
 #include "robot.h"
 
-#include <ArduinoEigenDense.h>
 using namespace Eigen;
-#include "FS.h"
-#include "SPI.h"
-#include "SD.h"
-
-#include "SparkFun_BMI270_Arduino_Library.h"
-
-#include <Wire.h>
-#include <Adafruit_SSD1306.h>
-
-
 
 //FSM State
 int STATE;
