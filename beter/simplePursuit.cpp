@@ -28,7 +28,7 @@ void simplePursuit::init(
   prevPointIndex = 0;
   currentGoalPointIndex = 1;
   
-  path[pathSize] = Vector2f(path[pathSize-1](0)+finalOffsetX, path[pathSize-1](1)+finalOffsetY);
+  path[pathSize-1] = Vector2f(path[pathSize-1](0)+finalOffsetX, path[pathSize-1](1)+finalOffsetY);
 
   //Calculate pathTotalDist and avgVx
   avgVx = 0;

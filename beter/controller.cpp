@@ -12,7 +12,8 @@ Controller::Controller(
   AccelStepper* pStepperL, AccelStepper* pStepperR,
   std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
   TaskHandle_t *iEngageSteppersHandle, 
-  BMI270* pImu0, BMI270* pImu1
+  BMI270* pImu0, BMI270* pImu1,
+  HWCDC* pDebugSerial
 ) 
 {
   stepperL = pStepperL;
@@ -22,6 +23,7 @@ Controller::Controller(
   engageSteppersHandle = iEngageSteppersHandle;
   imu0 = pImu0;
   imu1 = pImu1;
+  debugSerial = pDebugSerial;
 }
 
 void Controller::init(float iTheta) {
@@ -58,8 +60,8 @@ void Controller::gyroInit() {
 void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
-  //Serial.println(deltaTheta);
-  //Serial.println(theta*180/PI);
+  debugSerial->println(deltaTheta);
+  debugSerial->println(theta*180/PI);
   switch (state) {
     case 0:
       break;
@@ -127,7 +129,8 @@ void Controller::updateTheta() {
     float dTheta = omega*(t_now - t_0);
 
     //Filter
-    if (abs(omega) > HIGH_PASS_FREQ) {
+    //if (abs(omega) > HIGH_PASS_FREQ) {
+      if (1) {
       theta += dTheta;
     }
 
@@ -175,8 +178,8 @@ void Controller::moveX(float dist) {
 
 
 void Controller::turnTheta(float targetTheta) {
-  int maxOmega = mm_to_steps(MAX_ANG_VEL, WHEEL_RADIUS, STEPS_PER_REV)*WHEEL_RADIUS;
-  int maxAlpha = mm_to_steps(MAX_ANG_ACC, WHEEL_RADIUS, STEPS_PER_REV)*WHEEL_RADIUS;
+  int maxOmega = mm_to_steps(MAX_ANG_VEL*WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  int maxAlpha = mm_to_steps(MAX_ANG_ACC*WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
 
   //lock steppers 
   steppersEngaged_mtx->lock();
