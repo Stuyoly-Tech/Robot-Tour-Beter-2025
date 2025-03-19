@@ -4,11 +4,7 @@ using namespace Eigen;
 
 #include "simplePursuit.h"
 
-simplePursuit::simplePursuit(float iLimitVx, float iCenterToDowel) {
-  limitVx = iLimitVx;
-  centerToDowel = iCenterToDowel;
-  limitOmega = iLimitOmega;
-}
+simplePursuit::simplePursuit();
 
 float simplePursuit::getDist(Vector2f p1, Vector2f p2) {
   return sqrt(pow((p2(0)-p1(0)), 2) + pow((p2(1)-p1(1)), 2));
@@ -37,7 +33,7 @@ void simplePursuit::init(
 
   //Calculate pathTotalDist and avgVx
   avgVx = 0;
-  pathTotalDist -= centerToDowel;
+  pathTotalDist -= DIST_TO_DOWEL;
 
   for (int i=1; i<pathSize+1; i++) {
     pathTotalDist += getDist(path[i], path[i-1]);
@@ -83,8 +79,8 @@ float simplePursuit::getTheta() {
 float simplePursuit::getAvgVx(float t) {
   float remTime = targetTime - t;
   avgVx = pathTotalDist/remTime;
-  if ((avgVx > limitVx) || (remTime < 0)) {
-    avgVx = limitVx;
+  if ((avgVx > MAX_VX) || (remTime < 0)) {
+    avgVx = MAX_VX;
   }
   return avgVx;
 }

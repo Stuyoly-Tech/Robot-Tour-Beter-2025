@@ -62,29 +62,26 @@ std::mutex steppersEngaged_mtx;
 void engageSteppers(void *parameter);
 TaskHandle_t engageSteppersHandle = NULL;
 
+BMI270 IMU0;
+BMI270 IMU1;
+
 controller robotController(
-  WHEEL_RADIUS, TRACK_WIDTH,
   &stepperL, &stepperR,
-  STEPS_PER_REV, TURN_US,
-  IMU_UPDATE_US, &steppersEngaged_mtx,
-  &engageSteppers, &engageSteppersHandle,
-  HIGH_PASS_FREQ);
+  &steppersEngaged_mtx, &engageSteppers, 
+  &engageSteppersHandle,
+  *IMU0, *IMU1
+);
 
-simplePursuit robotSimplePursuit(MAX_VX, DIST_TO_DOWEL);
+simplePursuit robotSimplePursuit();
 
-robot Robot(
-  &robotSimplePursuit, &robotController,
-  MAX_ACCEL, MAX_ANG_ACCEL, MAX_ANG_VEL,
-  DIST_TO_DOWEL);
+robot Robot(&robotSimplePursuit, &robotController);
 
 void setup() {
-  //for steppers
-  //xTaskCreate(engageSteppers, "engageSteppers Task", 10000, NULL, 1, &engageSteppersHandle);
-
   //start init
   STATE = INIT;
 
   Serial.begin(115200);
+
   Wire.begin(17, 18);
   Wire.setClock(400000L);
 
@@ -101,7 +98,16 @@ void setup() {
   pinMode(INCR_B, INPUT);
 
   pinMode(STEP_ENABLE, OUTPUT);
-  digitalWrite(STEP_ENABLE, HIGH);
+  pinMode(SPREAD, OUTPUT);
+  pinMode(STEP_L, OUTPUT);
+  pinMode(DIR_L, OUTPUT);
+  pinMode(STEP_R, OUTPUT);
+  pinMode(DIR_R, OUTPUT);
+
+  pinMode(DIAG_L, INPUT);
+  pinMode(INDEX_L, INPUT);
+  pinMode(DIAG_R, INPUT);
+  pinMode(INDEX_R, INPUT);
 
   pinMode(LED_0, OUTPUT);
   pinMode(LED_1, OUTPUT);
@@ -109,7 +115,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
 
   //pinMode(SD_CS, OUTPUT);
-  //digitalWrite(SD_CS, HIGH);
+  //digitalWrite(SD_CS, HIGH);s
 
   //oled init
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
