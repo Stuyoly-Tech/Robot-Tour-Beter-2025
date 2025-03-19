@@ -29,16 +29,13 @@ class simplePursuit {
 
     //Time alloted for each turn, used to calculate avgVx
 
-    //in us
-    uint32_t turnInterval;
-
     float limitVx;
     float limitOmega;
     
     float getDist(Vector2f p1, Vector2f p2);
     
   public:
-    simplePursuit(float iLimitVx, float iLimitOmega, float iCenterToDowel);
+    simplePursuit();
     
     void init(
       Vector2f *iPath, int iPathSize, 
@@ -64,7 +61,7 @@ class simplePursuit {
     float getTheta();
 
     //Average speed needed to complete track on time
-    float getAvgVx(uint32_t elapsedTime);
+    float getAvgVx(float t);
 };
 
 #endif

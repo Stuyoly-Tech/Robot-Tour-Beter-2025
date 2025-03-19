@@ -126,8 +126,8 @@ void setup() {
 
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
-  Wire.write(73);
-  Wire.write(73);
+  Wire.write(0b00000100);
+  Wire.write(0b11000000);
   Wire.endTransmission();
 
   //sd init

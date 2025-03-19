@@ -23,17 +23,15 @@ class Controller {
     void (*engageSteppers)(void * parameter);
     TaskHandle_t *engageSteppersHandle;
 
-    //Kinematics
-    float theta;
-    float thetaSetPoint;
-
     float vx;
 
     //Control variables (mostly for P controller on theta)
     float t_0;
-    int state;
-
   public:
+
+    int state;
+    float theta;
+    float thetaSetPoint;
 
     Controller(
       AccelStepper* pStepperL, AccelStepper* pStepperR,
@@ -52,8 +50,6 @@ class Controller {
     void turnTheta(float targetTheta);
 
     void setVx(float newVx);
-
-    int getState();
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 //DAC
 #define VREF_VOLTAGE 0.9447
-#define DAC_ADDRESS 0x0D
+#define DAC_ADDRESS 0b00011010
 
 #define STEPS_PER_REV 200*8 //microsteps are controlled by dipswitch
 
