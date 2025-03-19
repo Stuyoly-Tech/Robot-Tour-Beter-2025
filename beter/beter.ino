@@ -24,57 +24,57 @@ using namespace Eigen;
 int STATE;
 
 //Path globals
-Vector2d PATH[100];  //= {Vector2d(0, 0), Vector2d(0, 300), Vector2d(300, 300), Vector2d(300, 0), Vector2d(0, 0)};
+Vector2f PATH[100];  //= {Vector2d(0, 0), Vector2d(0, 300), Vector2d(300, 300), Vector2d(300, 0), Vector2d(0, 0)};
 uint8_t PATH_SIZE;
 
 //Gates
-Vector2d GATES[7];
+Vector2f GATES[7];
 uint8_t GATE_SIZE;
 
 //Paramters
-double TARGET_TIME;
+float TARGET_TIME;
 
 int PATH_MODE;
 
-double TIME_INCREMENT = 0.1;
-double DIST_INCREMENT = 1;
+float TIME_INCREMENT = 0.1;
+float DIST_INCREMENT = 1;
 int TICKS = 0;
-double FINAL_OFFSET_X;
-double FINAL_OFFSET_Y;
-double TIME_OFFSET;
-double TEMP_OFFSET;
+float FINAL_OFFSET_X;
+float FINAL_OFFSET_Y;
+float TIME_OFFSET;
+float TEMP_OFFSET;
 
-uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
-bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
+uint8_t BTN_PINS[] = {BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN};
+bool BTN_PREV_STATES[] = {LOW, LOW, LOW, LOW, LOW};
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
-AccelStepper stepperL(AccelStepper::DRIVER, STEP_L, DIR_L);
-AccelStepper stepperR(AccelStepper::DRIVER, STEP_R, DIR_R);
+AccelStepper STEPPERL(AccelStepper::DRIVER, STEP_L, DIR_L);
+AccelStepper STEPPERR(AccelStepper::DRIVER, STEP_R, DIR_R);
 
 //Mutexes for stepper instances
-std::mutex steppersEngaged_mtx;
+std::mutex STEPPERSENGAGED_MTX;
 
 //Multicore tasks for engaging steppers
-void engageSteppers(void *parameter);
-TaskHandle_t engageSteppersHandle = NULL;
+void ENGAGESTEPPERS(void *parameter);
+TaskHandle_t ENGAGESTEPPERSHANDLE = NULL;
 
 BMI270 IMU0;
 BMI270 IMU1;
 
-controller robotController(
-  &stepperL, &stepperR,
-  &steppersEngaged_mtx, &engageSteppers, 
-  &engageSteppersHandle,
-  *IMU0, *IMU1
+Controller ROBOTCONTROLLER(
+  &STEPPERL, &STEPPERR,
+  &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS, 
+  &ENGAGESTEPPERSHANDLE,
+  &IMU0, &IMU1
 );
 
-simplePursuit robotSimplePursuit();
+simplePursuit ROBOTSIMPLEPURSUIT;
 
-robot Robot(&robotSimplePursuit, &robotController);
+Robot ROBOT(&ROBOTSIMPLEPURSUIT, &ROBOTCONTROLLER);
 
 void setup() {
   //start init
@@ -97,7 +97,7 @@ void setup() {
   pinMode(INCR_A, INPUT);
   pinMode(INCR_B, INPUT);
 
-  pinMode(STEP_ENABLE, OUTPUT);
+  pinMode(STEP_EN, OUTPUT);
   pinMode(SPREAD, OUTPUT);
   pinMode(STEP_L, OUTPUT);
   pinMode(DIR_L, OUTPUT);
@@ -111,8 +111,10 @@ void setup() {
 
   pinMode(LED_0, OUTPUT);
   pinMode(LED_1, OUTPUT);
-  pinMode(LASERS, OUTPUT);
+  pinMode(LASER, OUTPUT);
   pinMode(BUZZER, OUTPUT);
+
+  digitalWrite(SPREAD, LOW);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);s
@@ -126,8 +128,10 @@ void setup() {
 
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
-  Wire.write(0b00000100);
-  Wire.write(0b11000000);
+  //Wire.write(0b00000100);
+  //Wire.write(0b11000000);
+  Wire.write(73);
+  Wire.write(73);
   Wire.endTransmission();
 
   //sd init
@@ -140,7 +144,7 @@ void setup() {
   }
   //Serial.println("3");
   //load Paths
-  if (!loadPathFromSD(SD)) {
+  if (!LOADPATHFROMSD(SD)) {
     STATE = FILE_ERROR;
     displayScreen(STATE);
   }
@@ -177,10 +181,10 @@ void loop() {
       if (BTN_STATE(1)) {
         STATE = INIT;
         displayScreen(STATE);
-        Robot.init(PATH_MODE);
-        robotSimplePursuit.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        ROBOT.init(PATH_MODE);
+        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
-        digitalWrite(STEP_ENABLE, LOW);
+        digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
         displayScreen(STATE);
       }
@@ -188,56 +192,56 @@ void loop() {
         STATE = ADJUST_MENU;
       }
       if (BTN_STATE(3)) {
-        digitalWrite(LASERS, !digitalRead(LASERS));
+        digitalWrite(LASER, !digitalRead(LASER));
         digitalWrite(LED_1, !digitalRead(LED_1));
         displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        gyroInit();
+        ROBOTCONTROLLER.gyroInit();
         STATE = READY;
         displayScreen(STATE);
       }
       break;
     case READY:
       if (BTN_STATE(0)) {
-        digitalWrite(LASERS, LOW);
+        digitalWrite(LASER, LOW);
         digitalWrite(LED_0, HIGH);
         digitalWrite(LED_1, HIGH);
-        Robot.startPath();
+        ROBOT.startPath();
         STATE = RUNNING;
         displayScreen(STATE);
-        robotController.initTheta(PI / 2);
+        ROBOTCONTROLLER.theta = PI/2;
       }
       if (BTN_STATE(1)) {
         STATE = IDLE;
-        digitalWrite(STEP_ENABLE, HIGH);
+        digitalWrite(STEP_EN, HIGH);
         digitalWrite(LED_0, LOW);
         displayScreen(STATE);
       }
       if (BTN_STATE(3)) {
-        digitalWrite(LASERS, !digitalRead(LASERS));
+        digitalWrite(LASER, !digitalRead(LASER));
         digitalWrite(LED_1, !digitalRead(LED_1));
         displayScreen(STATE);
       }
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        gyroInit();
+        ROBOTCONTROLLER.gyroInit();
         STATE = READY;
         displayScreen(STATE);
       }
       break;
     case RUNNING:
-      Robot.update();
+      ROBOT.update();
       if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
         STATE = STOPPED;
         digitalWrite(LED_0, LOW);
         digitalWrite(LED_1, LOW);
         displayScreen(STATE);
       }
-      if (Robot.getState() == 0) {
+      if (ROBOT.getState() == 0) {
         STATE = END_RUN;
         digitalWrite(LED_0, LOW);
         digitalWrite(LED_1, LOW);
@@ -247,7 +251,7 @@ void loop() {
     case END_RUN:
       if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
         STATE = IDLE;
-        digitalWrite(STEP_ENABLE, HIGH);
+        digitalWrite(STEP_EN, HIGH);
         displayScreen(STATE);
       }
       break;
@@ -371,19 +375,18 @@ void loop() {
   }
 }
 
-void engageSteppers(void *parameter) {
+void ENGAGESTEPPERS(void *parameter) {
   //esp_task_wdt_init(300, false);
-  steppersEngaged_mtx.lock();
-  while (stepperL.run() && stepperR.run())
-    ;
-  stepperL.setCurrentPosition(stepperL.targetPosition());
-  stepperR.setCurrentPosition(stepperR.targetPosition());
-  steppersEngaged_mtx.unlock();
+  STEPPERSENGAGED_MTX.lock();
+  while (STEPPERL.run() && STEPPERR.run());
+  STEPPERL.setCurrentPosition(STEPPERL.targetPosition());
+  STEPPERR.setCurrentPosition(STEPPERR.targetPosition());
+  STEPPERSENGAGED_MTX.unlock();
   vTaskDelete(NULL);
 }
 
 //no more x y offset in SD file
-boolean loadPathFromSD(fs::FS &fs) {
+boolean LOADPATHFROMSD(fs::FS &fs) {
   /*
      FILE FORMAT
      
@@ -461,7 +464,7 @@ boolean loadPathFromSD(fs::FS &fs) {
     buff[0] = file.read();
     buff[1] = file.read();
     //coords
-    double pX, pY;
+    float pX, pY;
     switch (buff[0]) {
       case 'A':
         pX = 250;
@@ -503,7 +506,7 @@ boolean loadPathFromSD(fs::FS &fs) {
         return false;
     }
 
-    GATES[i] = Vector2d(pX, pY);
+    GATES[i] = Vector2f(pX, pY);
 
     //Skip to next line
     while (file.available()) {
@@ -525,7 +528,7 @@ boolean loadPathFromSD(fs::FS &fs) {
     buff[0] = file.read();
     buff[1] = file.read();
     //coords
-    double pX, pY;
+    float pX, pY;
     switch (buff[0]) {
       case 'A':
         pX = 250;
@@ -567,11 +570,11 @@ boolean loadPathFromSD(fs::FS &fs) {
         return false;
     }
     if (!firstDone) {
-      PATH[PATH_SIZE] = Vector2d(pX, -DIST_TO_DOWEL);
+      PATH[PATH_SIZE] = Vector2f(pX, -DIST_TO_DOWEL);
       PATH_SIZE++;
       firstDone = true;
     }
-    PATH[PATH_SIZE] = Vector2d(pX, pY);
+    PATH[PATH_SIZE] = Vector2f(pX, pY);
     PATH_SIZE++;
     while (file.available()) {
       if (file.read() == '\n') {
@@ -584,30 +587,30 @@ boolean loadPathFromSD(fs::FS &fs) {
 
 void testTurns() {
   delay(2000);
-  robotController.init();
-  Robot.init(1);
+  ROBOTCONTROLLER.init();
+  ROBOT.init(1);
   STATE = RUNNING;
   displayScreen(STATE);
-  digitalWrite(STEP_ENABLE, LOW);
+  digitalWrite(STEP_EN, LOW);
   for (int i = 0; i < 50; i++) {
-    robotController.setTheta(PI / 2);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.turnTheta(PI / 2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
-    robotController.setTheta(0);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.turnTheta(0);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
-    robotController.setTheta(PI);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.turnTheta(PI);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
-    robotController.setTheta(0);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.turnTheta(0);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
   }
@@ -616,22 +619,20 @@ void testTurns() {
 
 void testDist() {
   delay(2000);
-  robotController.init();
-  robotController.setTheta(PI / 2);
-  Robot.init(1);
+  ROBOT.init(1);
   STATE = RUNNING;
   displayScreen(STATE);
-  digitalWrite(STEP_ENABLE, LOW);
-  robotController.setMaxVx(MAX_VX);
+  digitalWrite(STEP_EN, LOW);
+  ROBOTCONTROLLER.setVx(MAX_VEL);
   for (int i = 0; i < 50; i++) {
-    robotController.moveX(300);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.moveX(300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
-    robotController.moveX(-300);
-    while (robotController.getState() != 0) {
-      robotController.update();
+    ROBOTCONTROLLER.moveX(-300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
     }
     delay(500);
   }
@@ -710,8 +711,8 @@ void displayScreen(int state) {
       SCREEN.print(FINAL_OFFSET_Y, 3);
       SCREEN.print("mm");
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 7 * 8);
-      SCREEN.print("LASERS?");
-      if (digitalRead(LASERS)) {
+      SCREEN.print("LASER?");
+      if (digitalRead(LASER)) {
         SCREEN.print("YES");
       } else SCREEN.print("NO");
       break;
@@ -745,8 +746,8 @@ void displayScreen(int state) {
       SCREEN.print(FINAL_OFFSET_Y, 3);
       SCREEN.print("mm");
       SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 7 * 8);
-      SCREEN.print("LASERS?");
-      if (digitalRead(LASERS)) {
+      SCREEN.print("LASER?");
+      if (digitalRead(LASER)) {
         SCREEN.print("YES");
       } else SCREEN.print("NO");
       break;
@@ -760,7 +761,7 @@ void displayScreen(int state) {
       SCREEN.setCursor(0, 0);
       SCREEN.println("RUN ENDED");
       SCREEN.println("RUNTIME:");
-      SCREEN.print(Robot.stopPath());
+      SCREEN.print(ROBOT.stopPath());
       SCREEN.print("s");
       break;
     case STOPPED:
@@ -768,7 +769,7 @@ void displayScreen(int state) {
       SCREEN.setCursor(0, 0);
       SCREEN.println("RUN STOPPED");
       SCREEN.println("RUNTIME:");
-      SCREEN.print(Robot.stopPath());
+      SCREEN.print(ROBOT.stopPath());
       SCREEN.print("s");
       break;
     case SD_ERROR:

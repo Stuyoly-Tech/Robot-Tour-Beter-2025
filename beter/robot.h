@@ -4,10 +4,12 @@
 #include "simplePursuit.h"
 #include "controller.h"
 
-class robot {
+#include "config.h"
+
+class Robot {
   private:
     simplePursuit *robotSimplePursuit;
-    controller *robotController; //robot controller
+    Controller *robotController; //robot controller
     
     //0 for idle
     //1 for deciding forward
@@ -25,15 +27,14 @@ class robot {
     float sgn(float n);
     
   public:
-    robot(simplePursuit *iSimplePursuit, controller *iController);
+    Robot(simplePursuit *iSimplePursuit, Controller *iController);
       
     void init();
     void init(int iPathMode);
     void update();
     void startPath();
     float stopPath();
-
-     getState();
+    int getState();
 
 };
 

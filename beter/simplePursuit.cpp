@@ -3,8 +3,7 @@
 using namespace Eigen;
 
 #include "simplePursuit.h"
-
-simplePursuit::simplePursuit();
+#include "config.h"
 
 float simplePursuit::getDist(Vector2f p1, Vector2f p2) {
   return sqrt(pow((p2(0)-p1(0)), 2) + pow((p2(1)-p1(1)), 2));
@@ -79,8 +78,8 @@ float simplePursuit::getTheta() {
 float simplePursuit::getAvgVx(float t) {
   float remTime = targetTime - t;
   avgVx = pathTotalDist/remTime;
-  if ((avgVx > MAX_VX) || (remTime < 0)) {
-    avgVx = MAX_VX;
+  if ((avgVx > MAX_VEL) || (remTime < 0)) {
+    avgVx = MAX_VEL;
   }
   return avgVx;
 }

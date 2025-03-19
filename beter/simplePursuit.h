@@ -35,7 +35,7 @@ class simplePursuit {
     float getDist(Vector2f p1, Vector2f p2);
     
   public:
-    simplePursuit();
+    //simplePursuit();
     
     void init(
       Vector2f *iPath, int iPathSize, 

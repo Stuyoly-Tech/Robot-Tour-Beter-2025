@@ -32,6 +32,7 @@ class Controller {
     int state;
     float theta;
     float thetaSetPoint;
+    
 
     Controller(
       AccelStepper* pStepperL, AccelStepper* pStepperR,
@@ -42,6 +43,7 @@ class Controller {
 
     void init(float iTheta);
     void init();
+    void gyroInit();
 
     void update();
     void updateTheta();

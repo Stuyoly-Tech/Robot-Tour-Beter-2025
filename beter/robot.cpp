@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-Robot::Robot(simplePursuit *iSimplePursuit, controller *iController) {
+Robot::Robot(simplePursuit *iSimplePursuit, Controller *iController) {
   robotSimplePursuit = iSimplePursuit;
   robotController = iController;
 }
@@ -37,7 +37,7 @@ void Robot::update() {
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
       }
-      vx = robotSimplePursuit->getAvgVx();
+      vx = robotSimplePursuit->getAvgVx(micros()/pow(10,6)-t_0);
       robotController->setVx(vx);
       robotController->moveX(dist);
       state = 2;
@@ -100,7 +100,7 @@ void Robot::update() {
           dist += DIST_TO_DOWEL; 
         }
 
-        vx = robotSimplePursuit->getAvgVx();
+        vx = robotSimplePursuit->getAvgVx(micros()/pow(10,6)-t_0);
         //vx = (2*robotController->mmToSteps(dist)*robotSimplePursuit->getAvgVx(micros() - start_us));
         //vx = vx / (robotController->mmToSteps(dist) + 2*(robotController->mmToSteps(dist)/maxAx));
         robotController->setVx(vx);
@@ -126,7 +126,7 @@ float Robot::stopPath() {
   return (micros()/pow(10, 6)) - t_0;
 }
 
-int Robot::getstate() {
+int Robot::getState() {
   return state;
 }
 

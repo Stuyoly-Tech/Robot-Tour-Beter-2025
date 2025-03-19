@@ -8,7 +8,7 @@
 #include "controller.h"
 
 
-controller::Controller(
+Controller::Controller(
   AccelStepper* pStepperL, AccelStepper* pStepperR,
   std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
   TaskHandle_t *iEngageSteppersHandle, 
@@ -44,6 +44,15 @@ void Controller::init() {
   thetaSetPoint = 0;
   vx = 0;
   t_0 = micros()/pow(10, 6);
+}
+
+void Controller::gyroInit() {
+  imu0->beginI2C(IMU0_ADDRESS);
+  imu0->performComponentRetrim();
+  imu0->performGyroOffsetCalibration();
+  imu1->beginI2C(IMU1_ADDRESS);
+  imu1->performComponentRetrim();
+  imu1->performGyroOffsetCalibration();
 }
 
 void Controller::update() {
@@ -119,7 +128,7 @@ void Controller::updateTheta() {
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {
-      theta += dtheta;
+      theta += dTheta;
     }
 
     //Rescale theta 
@@ -160,7 +169,7 @@ void Controller::moveX(float dist) {
     xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
 
     //Update state
-    STATE = 1;
+    state = 1;
   }
 }
 
@@ -206,8 +215,4 @@ void Controller::turnTheta(float targetTheta) {
 
 void Controller::setVx(float newVx) {
   vx = newVx;
-}
-
-void Controller::getState() {
-  return state;
 }

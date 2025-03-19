@@ -1,9 +1,9 @@
-#ifdef CONFIG__H
-#define CONFIG__H
+#ifndef CONFIG____H
+#define CONFIG____H
 
 //DAC
 #define VREF_VOLTAGE 0.9447
-#define DAC_ADDRESS 0b00011010
+#define DAC_ADDRESS 0xD//0b00011011
 
 #define STEPS_PER_REV 200*8 //microsteps are controlled by dipswitch
 
@@ -15,8 +15,8 @@
 #define SCREEN_WIRE &Wire
 
 //BMI160 IMU
-#define IMU_ADDRESS 0x68
-#define IMU2_ADDRESS 0x69
+#define IMU0_ADDRESS 0x68
+#define IMU1_ADDRESS 0x69
 #define IMU_UPDATE_PERIOD 0.10*pow(10, 3)
 
 //Robot physical dimensions
