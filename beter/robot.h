@@ -18,28 +18,28 @@ class robot {
     uint32_t start_us;
 
     //getting distance from end point
-    double centerToDowel;
+    float centerToDowel;
 
-    double maxAx;
-    double maxAngAx;
-    double maxAngVx;
+    float maxAx;
+    float maxAngAx;
+    float maxAngVx;
 
     int pathMode;
 
-    double sgn(double n);
+    float sgn(float n);
     
   public:
     robot( 
       simplePursuit *iSimplePursuit, controller *iController,
-      double iMaxAx, double iMaxAngAx, double iMaxAngVx,
-      double iCenterToDowel
+      float iMaxAx, float iMaxAngAx, float iMaxAngVx,
+      float iCenterToDowel
       );
       
     void init();
     void init(int iPathMode);
     void update();
     void startPath();
-    double stopPath();
+    float stopPath();
 
     uint8_t getState();
 
