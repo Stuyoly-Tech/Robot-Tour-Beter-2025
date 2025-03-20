@@ -90,13 +90,8 @@ void Controller::gyroInit() {
 void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
-<<<<<<< HEAD
   debugSerial->println(deltaTheta);
   debugSerial->println(theta * 180 / PI);
-=======
-  //debugSerial->println(deltaTheta);
-  debugSerial->println(theta);
->>>>>>> d22bce33511a3ce0829f47c9f8bd4d37dfdc0823
   switch (state) {
     case 0:
       break;
