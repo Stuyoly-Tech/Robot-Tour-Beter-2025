@@ -77,12 +77,17 @@ simplePursuit ROBOTSIMPLEPURSUIT;
 
 Robot ROBOT(&ROBOTSIMPLEPURSUIT, &ROBOTCONTROLLER);
 
+void beep() {
+  digitalWrite(BUZZER, HIGH);
+  delay(50);
+  digitalWrite(BUZZER, LOW);
+}
+
 void setup() {
   //start init
   STATE = INIT;
 
   Serial.begin(115200);
-  Serial.println("test");
 
   Wire.begin(17, 18);
   Wire.setClock(400000L);
@@ -115,6 +120,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
 
   digitalWrite(SPREAD, LOW);
+  digitalWrite(STEP_EN, HIGH);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);s
@@ -128,16 +134,15 @@ void setup() {
 
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
-  //Wire.write(0b00000100);
-  //Wire.write(0b11000000);
-  Wire.write(73);
-  Wire.write(73);
+  Wire.write(0b00001001);
+  Wire.write(0b10100000);
+  //Wire.write(73);
+  //Wire.write(73);
   Wire.endTransmission();
 
   //Init Gyros
   STATE = INIT;
   displayScreen(STATE);
-  ROBOTCONTROLLER.gyroInit();
 
 
   attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
@@ -161,12 +166,14 @@ void setup() {
 
   if (STATE == INIT) {
     Serial.println("init successful");
+    beep();
     STATE = IDLE;
     displayScreen(STATE);
   }
 
   if (PATH_MODE == 2) {
-    //ROBOTCONTROLLER.gyroInit();
+    ROBOTCONTROLLER.gyroInit();
+    beep();
     testTurns();
   }
 
@@ -205,6 +212,7 @@ void loop() {
         STATE = INIT;
         displayScreen(STATE);
         ROBOTCONTROLLER.gyroInit();
+        beep();
         STATE = READY;
         displayScreen(STATE);
       }
@@ -248,6 +256,7 @@ void loop() {
       }
       if (ROBOT.getState() == 0) {
         STATE = END_RUN;
+        beep();
         digitalWrite(LED_0, LOW);
         digitalWrite(LED_1, LOW);
         displayScreen(STATE);
@@ -487,7 +496,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         pX = 2250;
         break;
       default:
-        Serial.println("bad_gate!");
+        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
     switch (buff[1]) {

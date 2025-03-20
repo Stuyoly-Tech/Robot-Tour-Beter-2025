@@ -73,7 +73,7 @@ void Controller::gyroInit() {
   float sum = 0;
   t_0 = micros()/pow(10, 6);
   //Begin reading
-  for (int i=0; i<1000; ) {
+  for (int i=0; i<250; ) {
     float t = micros()/pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu0->getSensorData();
@@ -84,7 +84,7 @@ void Controller::gyroInit() {
       i++;
     }
   }
-  gyroOffset = sum/1000;
+  gyroOffset = sum/250;
 }
 
 
@@ -185,7 +185,7 @@ void Controller::updateTheta() {
 void Controller::moveX(float dist) {
   if (dist != 0) {
     int maxV = mm_to_steps(vx, WHEEL_RADIUS, STEPS_PER_REV);
-    int maxA = mm_to_steps(vx, WHEEL_RADIUS, STEPS_PER_REV);
+    int maxA = mm_to_steps(MAX_ACC, WHEEL_RADIUS, STEPS_PER_REV);
     int steps = mm_to_steps(dist, WHEEL_RADIUS, STEPS_PER_REV);
 
     //Lock steppers

@@ -28,12 +28,12 @@
 //Kinematics
 
 //in mm/s
-#define MAX_ACC 250
-#define MAX_VEL 500
+#define MAX_ACC 400
+#define MAX_VEL 800
 
 //in rad/sec
-#define MAX_ANG_ACC 3
-#define MAX_ANG_VEL 8
+#define MAX_ANG_ACC 5
+#define MAX_ANG_VEL 10
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.0005
