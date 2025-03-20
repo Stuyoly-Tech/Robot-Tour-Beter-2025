@@ -10,7 +10,7 @@ Robot::Robot(simplePursuit *iSimplePursuit, Controller *iController) {
 }
 
 void Robot::init() {
-  robotController->init(PI/2);
+  robotController->init(PI / 2);
   pathMode = 0;
   state = 0;
 }
@@ -31,14 +31,15 @@ void Robot::update() {
     case 0:
       break;
 
-    //deciding forward movement 
+    //deciding forward movement
     case 1:
       dist = robotSimplePursuit->getCurrentGoalPointDist();
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
         robotController->setVx(robotSimplePursuit->getAvgVx(micros() - t_0));
+      } else {
+        robotController->setVx(MAX_VEL);
       }
-      robotController->setVx(MAX_VEL);
       robotController->moveX(dist);
       state = 2;
       break;
@@ -47,8 +48,7 @@ void Robot::update() {
       if (robotController->state == 0) {
         if (robotSimplePursuit->atLastPoint()) {
           state = 0;
-        }
-        else {
+        } else {
           state = 3;
         }
       }
@@ -60,32 +60,31 @@ void Robot::update() {
       robotSimplePursuit->nextPoint();
       theta = robotSimplePursuit->getTheta();
       deltaTheta = robotSimplePursuit->getTheta() - robotController->thetaSetPoint;
-    
+
       while (deltaTheta > PI) {
         deltaTheta -= TWO_PI;
       }
       while (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-  
+
       //correct heading first;
       if (((abs(deltaTheta) == PI) && (pathMode == 1)) && !(robotSimplePursuit->isAGate())) {
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }
-  
+
       else {
         theta = robotSimplePursuit->getTheta();
         robotController->turnTheta(theta);
         state = 4;
       }
-    break;
+      break;
 
-    case 4:  
+    case 4:
       if (robotController->state == 0) {
         state = 1;
-      }
-      else {
+      } else {
         //Serial.println("UPDATE");
         robotController->update();
       }
@@ -97,32 +96,34 @@ void Robot::update() {
         dist = robotSimplePursuit->getCurrentGoalPointDist();
 
         if (robotSimplePursuit->atLastPoint()) {
-          dist += DIST_TO_DOWEL; 
+          dist += DIST_TO_DOWEL;
           robotController->setVx(robotSimplePursuit->getAvgVx(micros() - t_0));
+        } else {
         }
         //vx = (2*robotController->mmToSteps(dist)*robotSimplePursuit->getAvgVx(micros() - start_us));
         //vx = vx / (robotController->mmToSteps(dist) + 2*(robotController->mmToSteps(dist)/maxAx));
         robotController->setVx(MAX_VEL);
-        robotController->moveX(-dist);
-        state = 2;
       }
-      robotController->update();
-      break;
-      
-    default:
-      state = 0;
-      break;
+      robotController->moveX(-dist);
+      state = 2;
   }
+  robotController->update();
+  break;
+
+  default:
+    state = 0;
+    break;
+}
 }
 
 void Robot::startPath() {
-  t_0 = micros()/pow(10, 6);
+  t_0 = micros() / pow(10, 6);
   state = 1;
 }
 
 float Robot::stopPath() {
   state = 0;
-  return (micros()/pow(10, 6)) - t_0;
+  return (micros() / pow(10, 6)) - t_0;
 }
 
 int Robot::getState() {

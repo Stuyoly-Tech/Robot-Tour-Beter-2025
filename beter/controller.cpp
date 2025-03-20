@@ -92,7 +92,8 @@ void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
   //debugSerial->println(deltaTheta);
-  debugSerial->println(theta);
+  //debugSerial->println(theta);
+
   switch (state) {
     case 0:
       break;
