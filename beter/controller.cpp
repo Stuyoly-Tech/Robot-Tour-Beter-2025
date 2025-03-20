@@ -10,12 +10,10 @@
 
 Controller::Controller(
   AccelStepper* pStepperL, AccelStepper* pStepperR,
-  std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
-  TaskHandle_t *iEngageSteppersHandle, 
+  std::mutex* iSteppersEngaged_mtx, void (*iEngageSteppers)(void* parameter),
+  TaskHandle_t* iEngageSteppersHandle,
   BMI270* pImu0, BMI270* pImu1,
-  HWCDC* pDebugSerial
-) 
-{
+  HWCDC* pDebugSerial) {
   stepperL = pStepperL;
   stepperR = pStepperR;
   steppersEngaged_mtx = iSteppersEngaged_mtx;
@@ -45,7 +43,7 @@ void Controller::init() {
   theta = 0;
   thetaSetPoint = 0;
   vx = 0;
-  t_0 = micros()/pow(10, 6);
+  t_0 = micros() / pow(10, 6);
 }
 
 void Controller::gyroInit() {
@@ -61,7 +59,7 @@ void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
   debugSerial->println(deltaTheta);
-  debugSerial->println(theta*180/PI);
+  debugSerial->println(theta * 180 / PI);
   switch (state) {
     case 0:
       break;
@@ -88,9 +86,8 @@ void Controller::update() {
         stepperR->setCurrentPosition(stepperR->targetPosition());
         steppersEngaged_mtx->unlock();
         state = 0;
-      } 
-      else {
-        int steps = mm_to_steps(0.5*TRACK_WIDTH*deltaTheta, WHEEL_RADIUS, STEPS_PER_REV);
+      } else {
+        int steps = mm_to_steps(0.5 * TRACK_WIDTH * deltaTheta, WHEEL_RADIUS, STEPS_PER_REV);
         steppersEngaged_mtx->lock();
         stepperL->setCurrentPosition(stepperL->targetPosition());
         stepperR->setCurrentPosition(stepperR->targetPosition());
@@ -120,21 +117,21 @@ void Controller::update() {
 }
 
 void Controller::updateTheta() {
-  float t_now = micros()/pow(10, 6);
+  float t_now = micros() / pow(10, 6);
   if (t_now - t_0 > IMU_UPDATE_PERIOD) {
     //Update theta
     imu0->getSensorData();
     imu1->getSensorData();
-    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360;
-    float dTheta = omega*(t_now - t_0);
+    float omega = (imu0->data.gyroZ + imu1->data.gyroZ) * PI / 360;
+    float dTheta = omega * (t_now - t_0);
 
     //Filter
     //if (abs(omega) > HIGH_PASS_FREQ) {
-      if (1) {
+    if (1) {
       theta += dTheta;
     }
 
-    //Rescale theta 
+    //Rescale theta
     while (theta > PI) {
       theta -= TWO_PI;
     }
@@ -146,8 +143,8 @@ void Controller::updateTheta() {
 
 void Controller::moveX(float dist) {
   if (dist != 0) {
-    int maxV = mm_to_steps(MAX_VEL, WHEEL_RADIUS, STEPS_PER_REV);
-    int maxA = mm_to_steps(MAX_ACC, WHEEL_RADIUS, STEPS_PER_REV);
+    int maxV = mm_to_steps(vx, WHEEL_RADIUS, STEPS_PER_REV);
+    int maxA = mm_to_steps(vx, WHEEL_RADIUS, STEPS_PER_REV);
     int steps = mm_to_steps(dist, WHEEL_RADIUS, STEPS_PER_REV);
 
     //Lock steppers
@@ -178,10 +175,10 @@ void Controller::moveX(float dist) {
 
 
 void Controller::turnTheta(float targetTheta) {
-  int maxOmega = mm_to_steps(MAX_ANG_VEL*WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
-  int maxAlpha = mm_to_steps(MAX_ANG_ACC*WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  int maxOmega = mm_to_steps(MAX_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  int maxAlpha = mm_to_steps(MAX_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
 
-  //lock steppers 
+  //lock steppers
   steppersEngaged_mtx->lock();
 
   //set accel and vel
@@ -194,7 +191,7 @@ void Controller::turnTheta(float targetTheta) {
 
   //set wheel positions
   thetaSetPoint = targetTheta;
-  
+
   //Adjust to turn the right direction
   while (thetaSetPoint > PI) {
     thetaSetPoint -= TWO_PI;
@@ -202,7 +199,7 @@ void Controller::turnTheta(float targetTheta) {
   while (thetaSetPoint < -PI) {
     thetaSetPoint += TWO_PI;
   }
-  
+
   //Unlock
   steppersEngaged_mtx->unlock();
 
@@ -210,7 +207,7 @@ void Controller::turnTheta(float targetTheta) {
   xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
 
   //Update time
-  t_0 = micros()/pow(10, 6);
+  t_0 = micros() / pow(10, 6);
 
   //Change state
   state = 2;

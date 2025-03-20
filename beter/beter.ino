@@ -82,6 +82,7 @@ void setup() {
   STATE = INIT;
 
   Serial.begin(115200);
+  Serial.println("test");
 
   Wire.begin(17, 18);
   Wire.setClock(400000L);
@@ -159,7 +160,8 @@ void setup() {
   }
 
   if (PATH_MODE == 2) {
-    testTurns();
+    ROBOTCONTROLLER.gyroInit();
+    //testTurns();
   }
 
   if (PATH_MODE == 3) {
@@ -173,8 +175,8 @@ void loop() {
   //Serial.println(digitalRead(INCR_A));
   //Serial.print("B STATE: ");
   //Serial.println(digitalRead(INCR_B));
-  //robotController.updateTheta();
-  //Serial.println(robotController.getTheta());
+  ROBOTCONTROLLER.updateTheta();
+  Serial.println(ROBOTCONTROLLER.theta);
   switch (STATE) {
     case INIT:
       break;
