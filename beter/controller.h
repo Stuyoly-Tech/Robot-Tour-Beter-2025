@@ -27,6 +27,7 @@ class Controller {
     TaskHandle_t *engageSteppersHandle;
 
     float vx;
+    float gyroOffset;
 
     //Control variables (mostly for P controller on theta)
     float t_0;
