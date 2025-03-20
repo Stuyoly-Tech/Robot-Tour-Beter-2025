@@ -36,7 +36,7 @@ void Robot::update() {
       dist = robotSimplePursuit->getCurrentGoalPointDist();
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
-        robotController->setVx(robotSimplePursuit->getAvgVx(micros()/pow(10,6) - t_0));
+        robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, robotSimplePursuit->getCurrentGoalPointDist()));
       }
       else {
         robotController->setVx(MAX_VEL);
@@ -100,7 +100,7 @@ void Robot::update() {
 
         if (robotSimplePursuit->atLastPoint()) {
           dist += DIST_TO_DOWEL; 
-          robotController->setVx(robotSimplePursuit->getAvgVx(micros()/pow(10,6) - t_0));
+          robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, robotSimplePursuit->getCurrentGoalPointDist()));
         }
         else {
           //vx = (2*robotController->mmToSteps(dist)*robotSimplePursuit->getAvgVx(micros() - start_us));

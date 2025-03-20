@@ -4,6 +4,7 @@ using namespace Eigen;
 
 #include "simplePursuit.h"
 #include "config.h"
+#include "utils.h"
 
 float simplePursuit::getDist(Vector2f p1, Vector2f p2) {
   return sqrt(pow((p2(0)-p1(0)), 2) + pow((p2(1)-p1(1)), 2));
@@ -31,7 +32,7 @@ void simplePursuit::init(
   path[pathSize-1] = Vector2f(path[pathSize-1](0)+finalOffsetX, path[pathSize-1](1)+finalOffsetY);
 
   //Calculate pathTotalDist and avgVx
-  avgVx = 0;
+  endVx = 0;
   pathTotalDist -= DIST_TO_DOWEL;
 
   for (int i=1; i<pathSize+1; i++) {
@@ -75,11 +76,13 @@ float simplePursuit::getTheta() {
     );
 }
 
-float simplePursuit::getAvgVx(float t) {
+float simplePursuit::getEndVx(float t, float d) {
   float remTime = targetTime - t;
-  avgVx = pathTotalDist/remTime;
-  if ((avgVx > MAX_VEL) || (remTime < 0)) {
-    avgVx = MAX_VEL;
+  int a = MAX_ACC;
+  d = mm_to_steps(d, WHEEL_RADIUS, STEPS_PER_REV);
+  endVx = (a*t - sqrt(a*a*t*t - 4*a*d)) / 2;
+  if ((endVx > MAX_VEL) || (remTime < 0)) {
+    endVx = MAX_VEL;
   }
-  return avgVx;
+  return endVx;
 }

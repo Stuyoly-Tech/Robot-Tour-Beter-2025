@@ -25,7 +25,7 @@ class simplePursuit {
     float finalOffsetX;
     float finalOffsetY;
 
-    float avgVx;
+    float endVx;
 
     //Time alloted for each turn, used to calculate avgVx
 
@@ -61,7 +61,7 @@ class simplePursuit {
     float getTheta();
 
     //Average speed needed to complete track on time
-    float getAvgVx(float t);
+    float getEndVx(float t, float d);
 };
 
 #endif
