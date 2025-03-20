@@ -1,6 +1,8 @@
 #ifndef robot_h
 #define robot_h
 
+#include <HardwareSerial.h>
+
 #include "simplePursuit.h"
 #include "controller.h"
 
@@ -10,6 +12,8 @@ class Robot {
   private:
     simplePursuit *robotSimplePursuit;
     Controller *robotController; //robot controller
+
+    HWCDC* debugSerial;
     
     //0 for idle
     //1 for deciding forward
@@ -27,7 +31,7 @@ class Robot {
     float sgn(float n);
     
   public:
-    Robot(simplePursuit *iSimplePursuit, Controller *iController);
+    Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC* pDebugSerial);
       
     void init();
     void init(int iPathMode);

@@ -35,7 +35,7 @@ void simplePursuit::init(
   endVx = 0;
   pathTotalDist -= DIST_TO_DOWEL;
 
-  for (int i=1; i<pathSize+1; i++) {
+  for (int i=1; i<pathSize; i++) {
     pathTotalDist += getDist(path[i], path[i-1]);
   }
 }
@@ -53,7 +53,7 @@ void simplePursuit::nextPoint() {
 }
 
 boolean simplePursuit::atLastPoint() {
-  return (currentGoalPointIndex == pathSize);
+  return (currentGoalPointIndex == pathSize-1);
 }
 
 boolean simplePursuit::isAGate() {

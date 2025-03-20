@@ -21,14 +21,14 @@
 
 //Robot physical dimensions
 //in mm
-#define WHEEL_RADIUS 59.67/2
+#define WHEEL_RADIUS 59.67/2.0
 #define TRACK_WIDTH 116.95
 #define DIST_TO_DOWEL 33.175
 
 //Kinematics
 
 //in mm/s
-#define MAX_ACC 400
+#define MAX_ACC 200
 #define MAX_VEL 800
 
 //in rad/sec

@@ -4,9 +4,10 @@
 
 #include "config.h"
 
-Robot::Robot(simplePursuit *iSimplePursuit, Controller *iController) {
+Robot::Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC* pDebugSerial) {
   robotSimplePursuit = iSimplePursuit;
   robotController = iController;
+  debugSerial = pDebugSerial;
 }
 
 void Robot::init() {
@@ -61,7 +62,8 @@ void Robot::update() {
     case 3:
       robotSimplePursuit->nextPoint();
       theta = robotSimplePursuit->getTheta();
-      deltaTheta = robotSimplePursuit->getTheta() - robotController->thetaSetPoint;
+      deltaTheta = theta - robotController->thetaSetPoint;
+      debugSerial->println(deltaTheta);
     
       while (deltaTheta > PI) {
         deltaTheta -= TWO_PI;
@@ -71,13 +73,12 @@ void Robot::update() {
       }
   
       //correct heading first;
-      if ((abs(deltaTheta) == PI) && (pathMode == 1)) {
+      if (abs(abs(deltaTheta) - PI) < PI/4) {   
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }
   
       else {
-        theta = robotSimplePursuit->getTheta();
         robotController->turnTheta(theta);
         state = 4;
       }
