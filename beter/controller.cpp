@@ -48,19 +48,20 @@ void Controller::init() {
 
 void Controller::gyroInit() {
   //Configure IMUs
-  /*
+  
   bmi2_sens_config gyroConfig;
   gyroConfig.type = BMI2_GYRO;
   gyroConfig.cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
-  gyroConfig.cfg.gyr.bwp = BMI2_GYR_OSR4_MODE;
+  gyroConfig.cfg.gyr.bwp = BMI2_GYR_NORMAL_MODE;
   gyroConfig.cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
-  gyroConfig.cfg.gyr.ois_range = BMI2_GYR_OIS_250;
-  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_125;
+  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_250;
   gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
-
+  
   imu0->setConfig(gyroConfig);
   imu1->setConfig(gyroConfig);
-  */
+
+  delay(2000);
+  
   imu0->beginI2C(IMU0_ADDRESS);
   imu0->performComponentRetrim();
   imu0->performGyroOffsetCalibration();
@@ -72,7 +73,7 @@ void Controller::gyroInit() {
   float sum = 0;
   t_0 = micros()/pow(10, 6);
   //Begin reading
-  for (int i=0; i<100; ) {
+  for (int i=0; i<1000; ) {
     float t = micros()/pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu0->getSensorData();
@@ -83,20 +84,15 @@ void Controller::gyroInit() {
       i++;
     }
   }
-  gyroOffset = sum/100;
+  gyroOffset = sum/1000;
 }
 
 
 void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
-<<<<<<< HEAD
-  debugSerial->println(deltaTheta);
-  debugSerial->println(theta * 180 / PI);
-=======
   //debugSerial->println(deltaTheta);
   debugSerial->println(theta);
->>>>>>> d22bce33511a3ce0829f47c9f8bd4d37dfdc0823
   switch (state) {
     case 0:
       break;
@@ -169,7 +165,9 @@ void Controller::updateTheta() {
     float dTheta = omega*(t_now - t_0);
 
     //Filter
-    theta += dTheta;
+    if (abs(omega) > HIGH_PASS_FREQ) {
+      theta += dTheta;
+    }
 
     //Rescale theta
     while (theta > PI) {
@@ -179,7 +177,7 @@ void Controller::updateTheta() {
       theta += TWO_PI;
     }
 
-    t_0 = micros()/pow(10, 6);
+    t_0 = t_now;
   }
 }
 

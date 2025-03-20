@@ -166,8 +166,8 @@ void setup() {
   }
 
   if (PATH_MODE == 2) {
-    ROBOTCONTROLLER.gyroInit();
-    //testTurns();
+    //ROBOTCONTROLLER.gyroInit();
+    testTurns();
   }
 
   if (PATH_MODE == 3) {
@@ -177,15 +177,8 @@ void setup() {
 }
 
 void loop() {
-<<<<<<< HEAD
-  //Serial.print("A STATE: ");
-  //Serial.println(digitalRead(INCR_A));
-  //Serial.print("B STATE: ");
-  //Serial.println(digitalRead(INCR_B));
-  ROBOTCONTROLLER.updateTheta();
-  Serial.println(ROBOTCONTROLLER.theta);
-=======
->>>>>>> d22bce33511a3ce0829f47c9f8bd4d37dfdc0823
+  //ROBOTCONTROLLER.updateTheta();
+  //Serial.println(ROBOTCONTROLLER.theta);
   switch (STATE) {
     case INIT:
       break;
