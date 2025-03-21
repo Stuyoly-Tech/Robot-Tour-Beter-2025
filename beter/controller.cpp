@@ -54,7 +54,7 @@ void Controller::gyroInit() {
   gyroConfig.cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
   gyroConfig.cfg.gyr.bwp = BMI2_GYR_NORMAL_MODE;
   gyroConfig.cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
-  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_250;
+  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_500;
   gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
   
   imu0->setConfig(gyroConfig);
@@ -114,7 +114,7 @@ void Controller::update() {
       } else if (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-      if (abs(thetaSetPoint - theta) < 0.001) {
+      if (abs(thetaSetPoint - theta) < 0.0025) {
         steppersEngaged_mtx->lock();
         stepperL->setCurrentPosition(stepperL->targetPosition());
         stepperR->setCurrentPosition(stepperR->targetPosition());

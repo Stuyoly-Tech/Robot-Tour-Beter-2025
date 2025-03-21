@@ -33,13 +33,14 @@
 #define MAX_VEL 2000
 
 //in rad/sec
-#define MAX_ANG_ACC 5
-#define MAX_ANG_VEL 10
+#define MAX_ANG_ACC 10 //5
+#define MAX_ANG_VEL 20 //10
 
 //Filter for angular velocity drift
-#define HIGH_PASS_FREQ 0.0001
-#define COUNTER_BIAS 0.00058//0.0006 under 0.00055 over
-//0.0005 best value
+#define HIGH_PASS_FREQ 0.0001//0.0001
+#define COUNTER_BIAS 0.0 // right bias 0.0001 left bias 0.0001
+//BEST VALUE: 0.0003
+//0 best value
 //2.5*pow(10, -6)
 
 //PATH INFO

@@ -173,8 +173,9 @@ void setup() {
 }
 
 void loop() {
-  ROBOTCONTROLLER.updateTheta();
-  Serial.println(ROBOTCONTROLLER.theta);
+  //ROBOTCONTROLLER.updateTheta();
+  //Serial.println(ROBOTCONTROLLER.theta);
+  vTaskDelay(1);
   switch (STATE) {
     case INIT:
       break;
@@ -392,8 +393,7 @@ void loop() {
 void ENGAGESTEPPERS(void *parameter) {
   //esp_task_wdt_init(300, false);
   STEPPERSENGAGED_MTX.lock();
-  while (STEPPERL.run() && STEPPERR.run())
-    ;
+  while (STEPPERL.run() && STEPPERR.run());
   STEPPERL.setCurrentPosition(STEPPERL.targetPosition());
   STEPPERR.setCurrentPosition(STEPPERR.targetPosition());
   STEPPERSENGAGED_MTX.unlock();
@@ -666,7 +666,7 @@ void testSquare(){
   displayScreen(STATE);
   digitalWrite(STEP_EN, LOW);
   for (int i = 0; i < 50; i++) {
-    ROBOTCONTROLLER.moveX(300);
+    ROBOTCONTROLLER.moveX(2000);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
@@ -677,7 +677,7 @@ void testSquare(){
       displayScreen(TESTING_TURNS);
     }
 
-    ROBOTCONTROLLER.moveX(300);
+    ROBOTCONTROLLER.moveX(2000);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
@@ -688,7 +688,7 @@ void testSquare(){
       displayScreen(TESTING_TURNS);
     }
 
-    ROBOTCONTROLLER.moveX(300);
+    ROBOTCONTROLLER.moveX(2000);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
@@ -699,7 +699,51 @@ void testSquare(){
       displayScreen(TESTING_TURNS);
     }
 
-    ROBOTCONTROLLER.moveX(300);
+    ROBOTCONTROLLER.moveX(2000);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(PI/2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+    delay(2000);
+    ROBOTCONTROLLER.moveX(2000);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(0);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(2000);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(3*PI/2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(2000);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(PI);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(2000);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
