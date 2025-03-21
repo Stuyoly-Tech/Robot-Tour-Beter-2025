@@ -75,7 +75,7 @@ float simplePursuit::getTheta() {
 
 float simplePursuit::getEndVx(float t, float d) {
   float remTime = targetTime - t;
-  float a = steps_to_mm(MAX_ACC, WHEEL_RADIUS, STEPS_PER_REV);
+  float a = MAX_ACC;
   //Serial.println(a);
   //Serial.println(d);
   //Serial.println(remTime);
@@ -85,6 +85,9 @@ float simplePursuit::getEndVx(float t, float d) {
     //Serial.println(endVx);
     endVx = MAX_VEL;
     //Serial.println("SET MAX VX");
+  }
+  if(endVx > MAX_VEL || remTime <= 0){
+    endVx = MAX_VEL;
   }
   //Serial.println("SET END VX");
   return endVx;
