@@ -69,7 +69,7 @@ void Controller::gyroInit() {
   imu1->beginI2C(IMU1_ADDRESS);
   imu1->performComponentRetrim();
   imu1->performGyroOffsetCalibration();
-
+  
   float sum = 0;
   t_0 = micros()/pow(10, 6);
   //Begin reading
@@ -163,7 +163,7 @@ void Controller::updateTheta() {
 
     //debugSerial->printf("OMEGA: %f\n", omega);
 
-    float dTheta = omega*(t_now - t_0);
+    float dTheta = (omega + COUNTER_BIAS)*(t_now - t_0);
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {
@@ -193,15 +193,15 @@ void Controller::moveX(float dist) {
 
     //set accel and vel
     stepperL->setAcceleration(maxA);
-    stepperR->setAcceleration(maxA);
+    stepperR->setAcceleration(maxA*RIGHT_OFF);
     stepperL->setMaxSpeed(maxV);
-    stepperR->setMaxSpeed(maxV);
+    stepperR->setMaxSpeed(maxV*RIGHT_OFF);
     stepperL->setSpeed(maxV);
-    stepperR->setSpeed(maxV);
+    stepperR->setSpeed(maxV*RIGHT_OFF);
 
     //set wheel positions
     stepperL->move(steps);
-    stepperR->move(steps);
+    stepperR->move(steps*RIGHT_OFF);
 
     //Unlock steppers
     steppersEngaged_mtx->unlock();
@@ -224,11 +224,11 @@ void Controller::turnTheta(float targetTheta) {
 
   //set accel and vel
   stepperL->setAcceleration(maxAlpha);
-  stepperR->setAcceleration(maxAlpha);
+  stepperR->setAcceleration(maxAlpha*RIGHT_OFF);
   stepperL->setMaxSpeed(maxOmega);
-  stepperR->setMaxSpeed(maxOmega);
+  stepperR->setMaxSpeed(maxOmega*RIGHT_OFF);
   stepperL->setSpeed(maxOmega);
-  stepperR->setSpeed(maxOmega);
+  stepperR->setSpeed(maxOmega*RIGHT_OFF);
 
   //set wheel positions
   thetaSetPoint = targetTheta;

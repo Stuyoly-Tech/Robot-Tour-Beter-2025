@@ -73,7 +73,7 @@ void Robot::update() {
       }
   
       //correct heading first;
-      if (abs(abs(deltaTheta) - PI) < PI/4) {   
+      if (abs(abs(deltaTheta) - PI) < 0.03) {   
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }

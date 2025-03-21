@@ -81,12 +81,8 @@ float simplePursuit::getEndVx(float t, float d) {
   //Serial.println(remTime);
   if (a * a * remTime * remTime - 4 * a * d > 0) {
     endVx = (a * remTime - sqrt(a * a * remTime * remTime - 4 * a * d)) / 2;
-  }
-  else{
-    endVx = dist / remTime;
-  }
-  //Serial.println(endVx);
-  if ((endVx > MAX_VEL) || (remTime < 0)) {
+  } else {
+    //Serial.println(endVx);
     endVx = MAX_VEL;
     //Serial.println("SET MAX VX");
   }

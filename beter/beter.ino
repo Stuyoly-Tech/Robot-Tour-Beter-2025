@@ -44,8 +44,8 @@ float FINAL_OFFSET_Y;
 float TIME_OFFSET;
 float TEMP_OFFSET;
 
-uint8_t BTN_PINS[] = {BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN};
-bool BTN_PREV_STATES[] = {LOW, LOW, LOW, LOW, LOW};
+uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
+bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
 boolean loadPathFromSD(fs::FS &fs);
@@ -67,11 +67,10 @@ BMI270 IMU1;
 
 Controller ROBOTCONTROLLER(
   &STEPPERL, &STEPPERR,
-  &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS, 
+  &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS,
   &ENGAGESTEPPERSHANDLE,
   &IMU0, &IMU1,
-  &Serial
-);
+  &Serial);
 
 simplePursuit ROBOTSIMPLEPURSUIT;
 
@@ -170,22 +169,12 @@ void setup() {
     STATE = IDLE;
     displayScreen(STATE);
   }
-
-  if (PATH_MODE == 2) {
-    ROBOTCONTROLLER.gyroInit();
-    beep();
-    testTurns();
-  }
-
-  if (PATH_MODE == 3) {
-    testDist();
-  }
   //digitalWrite(BUZZER, HIGH);
 }
 
 void loop() {
-  //ROBOTCONTROLLER.updateTheta();
-  //Serial.println(ROBOTCONTROLLER.theta);
+  ROBOTCONTROLLER.updateTheta();
+  Serial.println(ROBOTCONTROLLER.theta);
   switch (STATE) {
     case INIT:
       break;
@@ -219,13 +208,24 @@ void loop() {
       break;
     case READY:
       if (BTN_STATE(0)) {
+        if (PATH_MODE == 2) {
+          ROBOTCONTROLLER.gyroInit();
+          beep();
+          testTurns();
+        }
+        if (PATH_MODE == 3) {
+          testDist();
+        }
+        if(PATH_MODE == 4){
+          testSquare();
+        }
         digitalWrite(LASER, LOW);
         digitalWrite(LED_0, HIGH);
         digitalWrite(LED_1, HIGH);
         ROBOT.startPath();
         STATE = RUNNING;
         displayScreen(STATE);
-        ROBOTCONTROLLER.theta = PI/2;
+        ROBOTCONTROLLER.theta = PI / 2;
       }
       if (BTN_STATE(1)) {
         STATE = IDLE;
@@ -392,7 +392,8 @@ void loop() {
 void ENGAGESTEPPERS(void *parameter) {
   //esp_task_wdt_init(300, false);
   STEPPERSENGAGED_MTX.lock();
-  while (STEPPERL.run() && STEPPERR.run());
+  while (STEPPERL.run() && STEPPERR.run())
+    ;
   STEPPERL.setCurrentPosition(STEPPERL.targetPosition());
   STEPPERR.setCurrentPosition(STEPPERR.targetPosition());
   STEPPERSENGAGED_MTX.unlock();
@@ -607,24 +608,28 @@ void testTurns() {
   displayScreen(STATE);
   digitalWrite(STEP_EN, LOW);
   for (int i = 0; i < 50; i++) {
-    ROBOTCONTROLLER.turnTheta(PI / 2);
-    while (ROBOTCONTROLLER.state != 0) {
-      ROBOTCONTROLLER.update();
-    }
-    delay(500);
     ROBOTCONTROLLER.turnTheta(0);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+    delay(500);
+    ROBOTCONTROLLER.turnTheta(PI/2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
     }
     delay(500);
     ROBOTCONTROLLER.turnTheta(PI);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(0);
+    ROBOTCONTROLLER.turnTheta(PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
     }
     delay(500);
   }
@@ -643,12 +648,68 @@ void testDist() {
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
-    delay(500);
+    delay(1000);
     ROBOTCONTROLLER.moveX(-300);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
-    delay(500);
+    delay(2000);
+  }
+  STATE = END_RUN;
+}
+
+void testSquare(){
+  delay(2000);
+  ROBOT.init(1);
+  ROBOTCONTROLLER.setVx(MAX_VEL);
+  STATE = RUNNING;
+  displayScreen(STATE);
+  digitalWrite(STEP_EN, LOW);
+  for (int i = 0; i < 50; i++) {
+    ROBOTCONTROLLER.moveX(300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(PI);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(3*PI/2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(0);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+
+    ROBOTCONTROLLER.moveX(300);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+    }
+
+    ROBOTCONTROLLER.turnTheta(PI/2);
+    while (ROBOTCONTROLLER.state != 0) {
+      ROBOTCONTROLLER.update();
+      displayScreen(TESTING_TURNS);
+    }
+    delay(2000);
   }
   STATE = END_RUN;
 }
@@ -889,6 +950,10 @@ void displayScreen(int state) {
       SCREEN.print(TEMP_OFFSET);
       SCREEN.print("s");
       break;
+    case TESTING_TURNS:
+      SCREEN.setTextSize(1);
+      SCREEN.println("THETA:");
+      SCREEN.println(ROBOTCONTROLLER.theta);
   }
   SCREEN.display();
   //Serial.println("SCREEN REFRESH");
