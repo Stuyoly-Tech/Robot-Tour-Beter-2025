@@ -38,7 +38,7 @@
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.0001//0.0001
-#define COUNTER_BIAS 0.0 // right bias 0.0001 left bias 0.0001
+#define COUNTER_BIAS 0.000008 // right bias 0.0001 left bias 0.0001
 //BEST VALUE: 0.0003
 //0 best value
 //2.5*pow(10, -6)

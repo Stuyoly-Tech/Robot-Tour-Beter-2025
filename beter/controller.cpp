@@ -159,11 +159,11 @@ void Controller::updateTheta() {
 
     //debugSerial->printf("IMU0: %f, IMU1: %f\n", imu0->data.gyroZ, imu1->data.gyroZ);
     
-    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0 - gyroOffset;
+    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0 - gyroOffset+ COUNTER_BIAS;
 
     //debugSerial->printf("OMEGA: %f\n", omega);
 
-    float dTheta = (omega + COUNTER_BIAS)*(t_now - t_0);
+    float dTheta = (omega)*(t_now - t_0);
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {
