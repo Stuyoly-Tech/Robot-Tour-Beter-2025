@@ -9,7 +9,7 @@
 #include <AccelStepper.h>
 #include <ArduinoEigenDense.h>
 #include <Adafruit_SSD1306.h>
-#include <SparkFun_BMI270_Arduino_Library.h>
+#include <BMI160Gen.h>
 
 #include "pinout.h"
 #include "config.h"
@@ -62,14 +62,11 @@ std::mutex STEPPERSENGAGED_MTX;
 void ENGAGESTEPPERS(void *parameter);
 TaskHandle_t ENGAGESTEPPERSHANDLE = NULL;
 
-BMI270 IMU0;
-BMI270 IMU1;
-
 Controller ROBOTCONTROLLER(
   &STEPPERL, &STEPPERR,
   &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS,
   &ENGAGESTEPPERSHANDLE,
-  &IMU0, &IMU1,
+  STEPS_PER_REV,
   &Serial);
 
 simplePursuit ROBOTSIMPLEPURSUIT;
@@ -142,6 +139,13 @@ void setup() {
   //Init Gyros
   STATE = INIT;
   displayScreen(STATE);
+  BMI160.begin(BMI160GenClass::I2C_MODE, Wire, IMU_ADDRESS);
+  //BMI160.setGyroRate(11);
+  delay(500);
+  BMI160.setFullScaleGyroRange(1); //1000 deg/s
+  BMI160.autoCalibrateGyroOffset();
+  delay(500);
+
 
 
   attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
@@ -201,7 +205,7 @@ void loop() {
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        ROBOTCONTROLLER.gyroInit();
+        //ROBOTCONTROLLER.gyroInit();
         beep();
         STATE = READY;
         displayScreen(STATE);
@@ -210,7 +214,7 @@ void loop() {
     case READY:
       if (BTN_STATE(0)) {
         if (PATH_MODE == 2) {
-          ROBOTCONTROLLER.gyroInit();
+          //ROBOTCONTROLLER.gyroInit();
           beep();
           testTurns();
         }
@@ -242,7 +246,7 @@ void loop() {
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        ROBOTCONTROLLER.gyroInit();
+        //ROBOTCONTROLLER.gyroInit();
         STATE = READY;
         displayScreen(STATE);
       }

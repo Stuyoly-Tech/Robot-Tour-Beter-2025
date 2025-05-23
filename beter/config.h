@@ -15,8 +15,7 @@
 #define SCREEN_WIRE &Wire
 
 //BMI160 IMU
-#define IMU0_ADDRESS 0x68
-#define IMU1_ADDRESS 0x69
+#define IMU_ADDRESS 0x68
 #define IMU_UPDATE_PERIOD 1.0/200
 
 //Robot physical dimensions
@@ -29,7 +28,7 @@
 //Kinematics
 
 //in mm/s
-#define MAX_ACC 500
+#define MAX_ACC 250
 #define MAX_VEL 2000
 
 //in rad/sec
