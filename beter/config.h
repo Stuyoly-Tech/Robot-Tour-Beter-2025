@@ -5,7 +5,7 @@
 #define VREF_VOLTAGE 0.9447
 #define DAC_ADDRESS 0xD//0b00011011
 
-#define STEPS_PER_REV 200*16 //microsteps are controlled by dipswitch
+#define STEPS_PER_REV 200*8 //microsteps are controlled by dipswitch
 
 //Screen
 #define SCREEN_WIDTH 128
@@ -15,7 +15,7 @@
 #define SCREEN_WIRE &Wire
 
 //BMI160 IMU
-#define IMU_ADDRESS 0x68
+#define IMU_ADDRESS 0x69
 #define IMU_UPDATE_PERIOD 1.0/200
 
 //Robot physical dimensions
@@ -28,16 +28,16 @@
 //Kinematics
 
 //in mm/s
-#define MAX_ACC 250
-#define MAX_VEL 2000
+#define MAX_ACC 500
+#define MAX_VEL 2500
 
 //in rad/sec
-#define MAX_ANG_ACC 10 //5
-#define MAX_ANG_VEL 20 //10
+#define MAX_ANG_ACC 5 //5
+#define MAX_ANG_VEL 10 //10
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.0001//0.0001
-#define COUNTER_BIAS 0.000008 // right bias 0.0001 left bias 0.0001
+#define COUNTER_BIAS 0 // right bias 0.00001 left bias 0
 //BEST VALUE: 0.0003
 //0 best value
 //2.5*pow(10, -6)

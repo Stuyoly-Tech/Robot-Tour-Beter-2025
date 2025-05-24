@@ -112,7 +112,7 @@ void Controller::updateTheta() {
   float t_now = micros() / pow(10, 6);
   if (t_now - t_0 > IMU_UPDATE_PERIOD) {
     //Update theta
-    double omega = ((BMI160.getRotationZ() * 1000.0) / 32768.0) * PI/180 + COUNTER_BIAS;
+    double omega = 1 * (((BMI160.getRotationZ() * 1000.0) / 32768.0) * PI/180 + COUNTER_BIAS);
 
     //debugSerial->printf("OMEGA: %f\n", omega);
 
