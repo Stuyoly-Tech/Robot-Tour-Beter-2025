@@ -9,7 +9,7 @@
 #include <AccelStepper.h>
 #include <ArduinoEigenDense.h>
 #include <Adafruit_SSD1306.h>
-#include <BMI160Gen.h>
+#include <SparkFun_BMI270_Arduino_Library.h>
 
 #include "pinout.h"
 #include "config.h"
@@ -62,11 +62,14 @@ std::mutex STEPPERSENGAGED_MTX;
 void ENGAGESTEPPERS(void *parameter);
 TaskHandle_t ENGAGESTEPPERSHANDLE = NULL;
 
+BMI270 IMU0;
+BMI270 IMU1;
+
 Controller ROBOTCONTROLLER(
   &STEPPERL, &STEPPERR,
   &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS,
   &ENGAGESTEPPERSHANDLE,
-  STEPS_PER_REV,
+  &IMU0, &IMU1,
   &Serial);
 
 simplePursuit ROBOTSIMPLEPURSUIT;
@@ -139,13 +142,6 @@ void setup() {
   //Init Gyros
   STATE = INIT;
   displayScreen(STATE);
-  BMI160.begin(BMI160GenClass::I2C_MODE, Wire, IMU_ADDRESS);
-  //BMI160.setGyroRate(11);
-  delay(500);
-  BMI160.setFullScaleGyroRange(1);  //1000 deg/s
-  BMI160.autoCalibrateGyroOffset();
-  delay(500);
-
 
 
   attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
@@ -189,7 +185,6 @@ void loop() {
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
         ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
-        ROBOTCONTROLLER.init();
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -206,13 +201,7 @@ void loop() {
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        //ROBOTCONTROLLER.gyroInit();
-        //BMI160.begin(BMI160GenClass::I2C_MODE, Wire, IMU_ADDRESS);
-        //BMI160.setGyroRate(11);
-        delay(500);
-        BMI160.setFullScaleGyroRange(1);  //1000 deg/s
-        BMI160.autoCalibrateGyroOffset();
-        delay(500);
+        ROBOTCONTROLLER.gyroInit();
         beep();
         STATE = READY;
         displayScreen(STATE);
@@ -221,20 +210,14 @@ void loop() {
     case READY:
       if (BTN_STATE(0)) {
         if (PATH_MODE == 2) {
-          //ROBOTCONTROLLER.gyroInit();
-          //BMI160.begin(BMI160GenClass::I2C_MODE, Wire, IMU_ADDRESS);
-          //BMI160.setGyroRate(11);
-          delay(500);
-          BMI160.setFullScaleGyroRange(1);  //1000 deg/s
-          BMI160.autoCalibrateGyroOffset();
-          delay(500);
+          ROBOTCONTROLLER.gyroInit();
           beep();
           testTurns();
         }
         if (PATH_MODE == 3) {
           testDist();
         }
-        if (PATH_MODE == 4) {
+        if(PATH_MODE == 4){
           testSquare();
         }
         digitalWrite(LASER, LOW);
@@ -259,11 +242,7 @@ void loop() {
       if (BTN_STATE(4)) {
         STATE = INIT;
         displayScreen(STATE);
-        //BMI160.setGyroRate(11);
-        delay(500);
-        BMI160.setFullScaleGyroRange(1);  //1000 deg/s
-        BMI160.autoCalibrateGyroOffset();
-        delay(500);
+        ROBOTCONTROLLER.gyroInit();
         STATE = READY;
         displayScreen(STATE);
       }
@@ -414,8 +393,7 @@ void loop() {
 void ENGAGESTEPPERS(void *parameter) {
   //esp_task_wdt_init(300, false);
   STEPPERSENGAGED_MTX.lock();
-  while (STEPPERL.run() && STEPPERR.run())
-    ;
+  while (STEPPERL.run() && STEPPERR.run());
   STEPPERL.setCurrentPosition(STEPPERL.targetPosition());
   STEPPERR.setCurrentPosition(STEPPERR.targetPosition());
   STEPPERSENGAGED_MTX.unlock();
@@ -636,7 +614,7 @@ void testTurns() {
       displayScreen(TESTING_TURNS);
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -648,7 +626,7 @@ void testTurns() {
       displayScreen(TESTING_TURNS);
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -680,7 +658,7 @@ void testDist() {
   STATE = END_RUN;
 }
 
-void testSquare() {
+void testSquare(){
   delay(2000);
   ROBOT.init(1);
   ROBOTCONTROLLER.setVx(MAX_VEL);
@@ -704,7 +682,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
+    ROBOTCONTROLLER.turnTheta(3*PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -726,7 +704,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -748,7 +726,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
+    ROBOTCONTROLLER.turnTheta(3*PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -770,7 +748,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI/2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -1017,7 +995,6 @@ void displayScreen(int state) {
       SCREEN.print("s");
       break;
     case TESTING_TURNS:
-      SCREEN.setCursor(0, 0);
       SCREEN.setTextSize(1);
       SCREEN.println("THETA:");
       SCREEN.println(ROBOTCONTROLLER.theta);

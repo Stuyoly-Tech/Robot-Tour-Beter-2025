@@ -4,7 +4,7 @@
 #include <mutex>
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include <BMI160Gen.h>
+#include <SparkFun_BMI270_Arduino_Library.h>
 #include <HardwareSerial.h>
 
 #include "utils.h"
@@ -15,7 +15,8 @@ class Controller {
     HWCDC* debugSerial;
 
     //IMU
-    uint32_t iIntervalIMUs;
+    BMI270 *imu0;
+    BMI270 *imu1;
 
     //Motors
     AccelStepper *stepperL;
@@ -30,7 +31,6 @@ class Controller {
 
     //Control variables (mostly for P controller on theta)
     float t_0;
-  
   public:
 
     int state;
@@ -41,8 +41,8 @@ class Controller {
     Controller(
       AccelStepper* pStepperL, AccelStepper* pStepperR,
       std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
-      TaskHandle_t *iEngageSteppersHandle,
-      uint32_t IntervalIMUs,
+      TaskHandle_t *iEngageSteppersHandle, 
+      BMI270* pImu0, BMI270* pImu1,
       HWCDC* pDebugSerial
     );
 

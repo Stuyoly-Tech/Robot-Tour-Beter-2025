@@ -1,7 +1,7 @@
 #include <mutex>
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include <BMI160Gen.h>
+#include <SparkFun_BMI270_Arduino_Library.h>
 
 #include "utils.h"
 #include "config.h"
@@ -12,14 +12,15 @@ Controller::Controller(
   AccelStepper* pStepperL, AccelStepper* pStepperR,
   std::mutex* iSteppersEngaged_mtx, void (*iEngageSteppers)(void* parameter),
   TaskHandle_t* iEngageSteppersHandle,
-  uint32_t IntervalIMUs,
+  BMI270* pImu0, BMI270* pImu1,
   HWCDC* pDebugSerial) {
   stepperL = pStepperL;
   stepperR = pStepperR;
   steppersEngaged_mtx = iSteppersEngaged_mtx;
   engageSteppers = iEngageSteppers;
   engageSteppersHandle = iEngageSteppersHandle;
-  IntervalIMUs = iIntervalIMUs;
+  imu0 = pImu0;
+  imu1 = pImu1;
   debugSerial = pDebugSerial;
 }
 
@@ -43,6 +44,47 @@ void Controller::init() {
   thetaSetPoint = 0;
   vx = 0;
   t_0 = micros() / pow(10, 6);
+}
+
+void Controller::gyroInit() {
+  //Configure IMUs
+  
+  bmi2_sens_config gyroConfig;
+  gyroConfig.type = BMI2_GYRO;
+  gyroConfig.cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
+  gyroConfig.cfg.gyr.bwp = BMI2_GYR_NORMAL_MODE;
+  gyroConfig.cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
+  gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_500;
+  gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
+  
+  imu0->setConfig(gyroConfig);
+  imu1->setConfig(gyroConfig);
+
+  delay(2000);
+  
+  imu0->beginI2C(IMU0_ADDRESS);
+  imu0->performComponentRetrim();
+  imu0->performGyroOffsetCalibration();
+
+  imu1->beginI2C(IMU1_ADDRESS);
+  imu1->performComponentRetrim();
+  imu1->performGyroOffsetCalibration();
+  
+  float sum = 0;
+  t_0 = micros()/pow(10, 6);
+  //Begin reading
+  for (int i=0; i<250; ) {
+    float t = micros()/pow(10, 6);
+    if (t - t_0 > IMU_UPDATE_PERIOD) {
+      imu0->getSensorData();
+      imu1->getSensorData();
+      float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0;
+      sum += omega;
+      t_0 = t;
+      i++;
+    }
+  }
+  gyroOffset = sum/250;
 }
 
 
@@ -112,7 +154,12 @@ void Controller::updateTheta() {
   float t_now = micros() / pow(10, 6);
   if (t_now - t_0 > IMU_UPDATE_PERIOD) {
     //Update theta
-    double omega = 1 * (((BMI160.getRotationZ() * 1000.0) / 32768.0) * PI/180 + COUNTER_BIAS);
+    imu0->getSensorData();
+    imu1->getSensorData();
+
+    //debugSerial->printf("IMU0: %f, IMU1: %f\n", imu0->data.gyroZ, imu1->data.gyroZ);
+    
+    float omega = (imu0->data.gyroZ + imu1->data.gyroZ)*PI/360.0 - gyroOffset+ COUNTER_BIAS;
 
     //debugSerial->printf("OMEGA: %f\n", omega);
 

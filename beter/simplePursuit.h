@@ -11,7 +11,7 @@ using namespace Eigen;
 class simplePursuit {
   private:
     Vector2f *path;
-    Vector2f *gates;d
+    Vector2f *gates;
 
     int pathSize;
     int gateSize;
