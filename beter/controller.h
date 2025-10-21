@@ -16,7 +16,6 @@ class Controller {
 
     //IMU
     BMI270 *imu0;
-    BMI270 *imu1;
 
     //Motors
     AccelStepper *stepperL;
@@ -42,7 +41,7 @@ class Controller {
       AccelStepper* pStepperL, AccelStepper* pStepperR,
       std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
       TaskHandle_t *iEngageSteppersHandle, 
-      BMI270* pImu0, BMI270* pImu1,
+      BMI270* pImu0,
       HWCDC* pDebugSerial
     );
 

@@ -63,13 +63,12 @@ void ENGAGESTEPPERS(void *parameter);
 TaskHandle_t ENGAGESTEPPERSHANDLE = NULL;
 
 BMI270 IMU0;
-BMI270 IMU1;
 
 Controller ROBOTCONTROLLER(
   &STEPPERL, &STEPPERR,
   &STEPPERSENGAGED_MTX, &ENGAGESTEPPERS,
   &ENGAGESTEPPERSHANDLE,
-  &IMU0, &IMU1,
+  &IMU0,
   &Serial);
 
 simplePursuit ROBOTSIMPLEPURSUIT;
@@ -482,19 +481,37 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     float pX, pY;
     switch (buff[0]) {
       case 'A':
-        pX = 250;
+        pX = 0;
         break;
       case 'B':
-        pX = 750;
+        pX = 250;
         break;
       case 'C':
-        pX = 1250;
+        pX = 500;
         break;
       case 'D':
-        pX = 1750;
+        pX = 750;
         break;
       case 'E':
+        pX = 1000;
+        break;
+      case 'F':
+        pX = 1250;
+        break;
+      case 'G':
+        pX = 1500;
+        break;
+      case 'H':
+        pX = 1750;
+        break;
+      case 'I':
+        pX = 2000;
+        break;
+      case 'J':
         pX = 2250;
+        break;
+       case 'K':
+        pX = 2500;
         break;
       default:
         Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
@@ -502,19 +519,37 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     }
     switch (buff[1]) {
       case '1':
-        pY = 250;
+        pY = 0;
         break;
       case '2':
-        pY = 750;
+        pY = 250;
         break;
       case '3':
-        pY = 1250;
+        pY = 500;
         break;
       case '4':
-        pY = 1750;
+        pY = 750;
         break;
       case '5':
+        pY = 1000;
+        break;
+      case '6':
+        pY = 1250;
+        break;
+      case '7':
+        pY = 1500;
+        break;
+      case '8':
+        pY = 1750;
+        break;
+      case '9':
+        pY = 2000;
+        break;
+      case '10':
         pY = 2250;
+        break;
+      case '11':
+        pY = 2500;
         break;
       default:
         Serial.println("bad_gate!");
@@ -546,44 +581,81 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     float pX, pY;
     switch (buff[0]) {
       case 'A':
-        pX = 250;
+        pX = 0;
         break;
       case 'B':
-        pX = 750;
+        pX = 250;
         break;
       case 'C':
-        pX = 1250;
+        pX = 500;
         break;
       case 'D':
-        pX = 1750;
+        pX = 750;
         break;
       case 'E':
+        pX = 1000;
+        break;
+      case 'F':
+        pX = 1250;
+        break;
+      case 'G':
+        pX = 1500;
+        break;
+      case 'H':
+        pX = 1750;
+        break;
+      case 'I':
+        pX = 2000;
+        break;
+      case 'J':
         pX = 2250;
         break;
+       case 'K':
+        pX = 2500;
+        break;
       default:
-        Serial.println("bad_path!");
+        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
     switch (buff[1]) {
       case '1':
-        pY = 250;
+        pY = 0;
         break;
       case '2':
-        pY = 750;
+        pY = 250;
         break;
       case '3':
-        pY = 1250;
+        pY = 500;
         break;
       case '4':
-        pY = 1750;
+        pY = 750;
         break;
       case '5':
+        pY = 1000;
+        break;
+      case '6':
+        pY = 1250;
+        break;
+      case '7':
+        pY = 1500;
+        break;
+      case '8':
+        pY = 1750;
+        break;
+      case '9':
+        pY = 2000;
+        break;
+      case '10':
         pY = 2250;
         break;
+      case '11':
+        pY = 2500;
+        break;
       default:
-        Serial.println("bad_path!");
+        Serial.println("bad_gate!");
         return false;
     }
+   
     if (!firstDone) {
       PATH[PATH_SIZE] = Vector2f(pX, -DIST_TO_DOWEL);
       PATH_SIZE++;

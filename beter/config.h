@@ -16,7 +16,6 @@
 
 //BMI160 IMU
 #define IMU0_ADDRESS 0x68
-#define IMU1_ADDRESS 0x69
 #define IMU_UPDATE_PERIOD 1.0/200
 
 //Robot physical dimensions
