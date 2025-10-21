@@ -12,14 +12,14 @@ Controller::Controller(
   AccelStepper* pStepperL, AccelStepper* pStepperR,
   std::mutex* iSteppersEngaged_mtx, void (*iEngageSteppers)(void* parameter),
   TaskHandle_t* iEngageSteppersHandle,
-  BMI270* pImu0,
+  BMI270* pImu,
   HWCDC* pDebugSerial) {
   stepperL = pStepperL;
   stepperR = pStepperR;
   steppersEngaged_mtx = iSteppersEngaged_mtx;
   engageSteppers = iEngageSteppers;
   engageSteppersHandle = iEngageSteppersHandle;
-  imu0 = pImu0;
+  imu = pImu;
   debugSerial = pDebugSerial;
 }
 
@@ -56,13 +56,13 @@ void Controller::gyroInit() {
   gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_500;
   gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
   
-  imu0->setConfig(gyroConfig);
+  imu->setConfig(gyroConfig);
 
   delay(2000);
   
-  imu0->beginI2C(IMU0_ADDRESS);
-  imu0->performComponentRetrim();
-  imu0->performGyroOffsetCalibration();
+  imu->beginI2C(IMU_ADDRESS);
+  imu->performComponentRetrim();
+  imu->performGyroOffsetCalibration();
  
   float sum = 0;
   t_0 = micros()/pow(10, 6);
@@ -70,8 +70,8 @@ void Controller::gyroInit() {
   for (int i=0; i<250; ) {
     float t = micros()/pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
-      imu0->getSensorData();
-      float omega = (imu0->data.gyroZ)*PI/180.0;
+      imu->getSensorData();
+      float omega = (imu->data.gyroZ)*PI/180.0;
       sum += omega;
       t_0 = t;
       i++;
@@ -147,11 +147,11 @@ void Controller::updateTheta() {
   float t_now = micros() / pow(10, 6);
   if (t_now - t_0 > IMU_UPDATE_PERIOD) {
     //Update theta
-    imu0->getSensorData();
+    imu->getSensorData();
 
-    //debugSerial->printf("IMU0: %f, imu0->data.gyroZ);
+    //debugSerial->printf("IMU: %f, imu->data.gyroZ);
     
-    float omega = (imu0->data.gyroZ)*PI/180.0 - gyroOffset+ COUNTER_BIAS;
+    float omega = (imu->data.gyroZ)*PI/180.0 - gyroOffset+ COUNTER_BIAS;
 
     //debugSerial->printf("OMEGA: %f\n", omega);
 

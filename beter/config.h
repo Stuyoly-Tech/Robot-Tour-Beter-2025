@@ -15,7 +15,7 @@
 #define SCREEN_WIRE &Wire
 
 //BMI270 IMU
-#define IMU0_ADDRESS 0x68
+#define IMU_ADDRESS 0x68
 #define IMU_UPDATE_PERIOD 1.0/200
 
 //Robot physical dimensions
