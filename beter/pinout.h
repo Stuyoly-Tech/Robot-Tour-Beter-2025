@@ -29,7 +29,7 @@
 #define INDEX_R 12
 
 #define STEP_EN 9
-#define SPREAD 45
+#define SPREAD 45   
 
 //Laser
 #define LASER 42

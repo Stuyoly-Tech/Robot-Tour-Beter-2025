@@ -71,7 +71,9 @@ Controller ROBOTCONTROLLER(
   &IMU,
   &Serial);
 
-simplePursuit ROBOTSIMPLEPURSUIT;
+simplePursuit ROBOTSIMPLEPURSUIT;  Wire.endTransmission();
+  Wire.endTransmission();
+
 
 Robot ROBOT(&ROBOTSIMPLEPURSUIT, &ROBOTCONTROLLER, &Serial);
 
@@ -80,6 +82,7 @@ void beep() {
   delay(50);
   digitalWrite(BUZZER, LOW);
 }
+  Wire.endTransmission();
 
 void setup() {
   //start init
@@ -137,6 +140,8 @@ void setup() {
   //Wire.write(73);
   //Wire.write(73);
   Wire.endTransmission();
+  Wire.endTransmission();  Wire.endTransmission();
+
 
   //Init Gyros
   STATE = INIT;
@@ -545,10 +550,10 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case '9':
         pY = 2000;
         break;
-      case '10':
+      case 'A':
         pY = 2250;
         break;
-      case '11':
+      case 'B':
         pY = 2500;
         break;
       default:
@@ -645,10 +650,10 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case '9':
         pY = 2000;
         break;
-      case '10':
+      case 'A':
         pY = 2250;
         break;
-      case '11':
+      case 'B':
         pY = 2500;
         break;
       default:
