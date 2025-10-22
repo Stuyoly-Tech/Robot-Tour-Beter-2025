@@ -71,8 +71,7 @@ Controller ROBOTCONTROLLER(
   &IMU,
   &Serial);
 
-simplePursuit ROBOTSIMPLEPURSUIT;  Wire.endTransmission();
-  Wire.endTransmission();
+simplePursuit ROBOTSIMPLEPURSUIT;
 
 
 Robot ROBOT(&ROBOTSIMPLEPURSUIT, &ROBOTCONTROLLER, &Serial);
@@ -82,7 +81,7 @@ void beep() {
   delay(50);
   digitalWrite(BUZZER, LOW);
 }
-  Wire.endTransmission();
+
 
 void setup() {
   //start init
@@ -140,7 +139,7 @@ void setup() {
   //Wire.write(73);
   //Wire.write(73);
   Wire.endTransmission();
-  Wire.endTransmission();  Wire.endTransmission();
+
 
 
   //Init Gyros
