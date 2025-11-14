@@ -193,7 +193,7 @@ void loop() {
         STATE = INIT;
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
-        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, BOTTLE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, BOTTLES, BOTTLE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -464,21 +464,20 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   PATH_MODE = atoi(buff);
   file.read();
 
-  //read in target time
-
   //skip first line until newline is reached
   while (file.available()) {
     if (file.read() == '\n') {
       break;
     }
   }
+  //read in target time
   for (int i = 0; i < 5; i++) {
     buff[i] = file.read();
   }
   TARGET_TIME = atof(buff);
   file.read();
 
-  //skip line
+  //skip line (skips "BOTTLE?:")
   while (file.available()) {
     if (file.read() == '\n') {
       break;
@@ -601,9 +600,10 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   for (byte i = 0; i < BOTTLE_SIZE; i++) {
     buff[0] = '0';
     buff[1] = file.read();
+    file.read();
     //true/false
     boolean BOTTLE_STATE = false;
-    switch (buff[0]) {
+    switch (buff[1]) {
       case 'T':
         BOTTLE_STATE = true;
         break;
@@ -616,7 +616,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     }
     BOTTLES[i] = BOTTLE_STATE;
     
-    //Skip to next line
+    //Skip to next line (Skips "PATH:")
     while (file.available()) {
       if (file.read() == '\n') {
         break;
@@ -625,12 +625,6 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   }
   //Bottle Stuff End
 
-  //Skip line
-  while (file.available()) {
-    if (file.read() == '\n') {
-      break;
-    }
-  }
   //bool firstDone = false;
   //Read in paths
   while (file.available()) {
@@ -669,10 +663,8 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'J':
         pX = 2250;
         break;
-       case 'K':
+      case 'K':
         pX = 2500;
-        break;
-      case 'P':
         break;
       default:
         Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);

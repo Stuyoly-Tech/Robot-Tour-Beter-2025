@@ -14,7 +14,7 @@ float simplePursuit::getDist(Vector2f p1, Vector2f p2) {
 void simplePursuit::init(
   Vector2f *iPath, int iPathSize,
   Vector2f *iGates, int iGateSize,
-  //int iBottles[],
+  bool* iBottles,
   int iBottleSize,
   float iTargetTime,
   float iFinalOffsetY, float iFinalOffsetX) {
@@ -22,7 +22,7 @@ void simplePursuit::init(
   pathSize = iPathSize;
   gates = iGates;
   gateSize = iGateSize;
-  //bottles = iBottles;
+  bottles = iBottles;
   bottleSize = iBottleSize;
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
@@ -100,13 +100,12 @@ float simplePursuit::getEndVx(float t, float d) {
   return endVx;
 }
 
-/*
+
 boolean simplePursuit::hasABottle(){
   for(int i = 0; i < bottleSize; i++){
-    if(path[currentGoalPointIndex] == bottles[i]){
-      return true;
+    if(bottles[i]){
+      return false;
     }
   }
-  return false;
+  return true;
 }
-*/

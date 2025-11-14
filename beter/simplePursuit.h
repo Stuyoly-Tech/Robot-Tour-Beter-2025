@@ -12,7 +12,6 @@ class simplePursuit {
   private:
     Vector2f *path;
     Vector2f *gates;
-    //Vector2f *bottles;
 
     int pathSize;
     int gateSize;
@@ -35,7 +34,7 @@ class simplePursuit {
     float limitOmega;
     
     float getDist(Vector2f p1, Vector2f p2);
-    //int bottles[];
+    bool* bottles;
     
   public:
     //simplePursuit();
@@ -43,7 +42,7 @@ class simplePursuit {
     void init(
       Vector2f *iPath, int iPathSize, 
       Vector2f *iGates, int iGateSize, 
-      //int iBottles[],
+      bool* iBottles,
       int iBottleSize, 
       float iTargetTime, 
       float iFinalOffsetY, float iFinalOffsetX
@@ -69,7 +68,7 @@ class simplePursuit {
     float getEndVx(float t, float d);
 
     //Bottle Stuff
-    //boolean hasABottle();
+    boolean hasABottle();
 };
 
 #endif
