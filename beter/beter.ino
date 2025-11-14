@@ -32,14 +32,14 @@ Vector2f GATES[7];
 uint8_t GATE_SIZE;
 
 //Bottles
-Vector2f BOTTLES[7];
+boolean BOTTLES[7];
+bool prevBottleState = false;
 uint8_t BOTTLE_SIZE;
 
 //Paramters
 float TARGET_TIME;
 
 int PATH_MODE;
-bool BOTTLE_STATE = false;
 
 float TIME_INCREMENT = 0.1;
 float DIST_INCREMENT = 1;
@@ -193,7 +193,7 @@ void loop() {
         STATE = INIT;
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
-        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, BOTTLES, BOTTLE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, BOTTLE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -431,11 +431,16 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
      1
      TARGET TIME:
      50.00
+     BOTTLE?:
+     F
+     F
+     T
+     F
+     F
+     F
      PATH:
      A1
-     PU
      B2
-     PD
      ...
   */
   File file = fs.open(PATH_FILE);
@@ -479,7 +484,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       break;
     }
   }
-
+/*
   //read in gate number
   buff[0] = '0';
   buff[1] = file.read();
@@ -492,7 +497,6 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       break;
     }
   }
-/*
   //Read in Gates
   for (byte i = 0; i < GATE_SIZE; i++) {
     buff[0] = file.read();
@@ -592,91 +596,25 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       break;
     }
   }
-
+*/
 //Bottle Stuff Start
   for (byte i = 0; i < BOTTLE_SIZE; i++) {
-    buff[0] = file.read();
+    buff[0] = '0';
     buff[1] = file.read();
-    //coords
-    float pX, pY;
+    //true/false
+    boolean BOTTLE_STATE = false;
     switch (buff[0]) {
-      case 'A':
-        pX = 0;
-        break;
-      case 'B':
-        pX = 250;
-        break;
-      case 'C':
-        pX = 500;
-        break;
-      case 'D':
-        pX = 750;
-        break;
-      case 'E':
-        pX = 1000;
+      case 'T':
+        BOTTLE_STATE = true;
         break;
       case 'F':
-        pX = 1250;
-        break;
-      case 'G':
-        pX = 1500;
-        break;
-      case 'H':
-        pX = 1750;
-        break;
-      case 'I':
-        pX = 2000;
-        break;
-      case 'J':
-        pX = 2250;
-        break;
-       case 'K':
-        pX = 2500;
+        BOTTLE_STATE = false;
         break;
       default:
         Serial.printf("bad_bottle! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
-    switch (buff[1]) {
-      case '1':
-        pY = 0;
-        break;
-      case '2':
-        pY = 250;
-        break;
-      case '3':
-        pY = 500;
-        break;
-      case '4':
-        pY = 750;
-        break;
-      case '5':
-        pY = 1000;
-        break;
-      case '6':
-        pY = 1250;
-        break;
-      case '7':
-        pY = 1500;
-        break;
-      case '8':
-        pY = 1750;
-        break;
-      case '9':
-        pY = 2000;
-        break;
-      case 'A':
-        pY = 2250;
-        break;
-      case 'B':
-        pY = 2500;
-        break;
-      default:
-        Serial.println("bad_bottle!");
-        return false;
-    }
-
-    BOTTLES[i] = Vector2f(pX, pY);
+    BOTTLES[i] = BOTTLE_STATE;
     
     //Skip to next line
     while (file.available()) {
@@ -685,8 +623,8 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       }
     }
   }
-//Bottle Stuff End
-*/
+  //Bottle Stuff End
+
   //Skip line
   while (file.available()) {
     if (file.read() == '\n') {
@@ -774,10 +712,6 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'B':
         pY = 2500;
         break;
-      case 'U':
-        BOTTLE_STATE = true;
-      case 'D':
-        BOTTLE_STATE = false;
       default:
         Serial.println("bad_gate!");
         return false;
@@ -792,6 +726,16 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     */
     PATH[PATH_SIZE] = Vector2f(pX, pY);
     PATH_SIZE++;
+    /*
+    if(BOTTLE_STATE){
+      BOTTLES[BOTTLE_SIZE] = true;
+      BOTTLE_SIZE++;
+    }
+    else{
+      BOTTLES[BOTTLE_SIZE] = false;
+      BOTTLE_SIZE++;
+    }
+    */
     while (file.available()) {
       if (file.read() == '\n') {
         break;
