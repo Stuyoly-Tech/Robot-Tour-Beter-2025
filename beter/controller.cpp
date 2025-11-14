@@ -71,7 +71,7 @@ void Controller::gyroInit() {
     float t = micros()/pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu->getSensorData();
-      float omega = (imu->data.gyroZ)*PI/180.0;
+      float omega = (imu->data.gyroZ)*PI/360.0;
       sum += omega;
       t_0 = t;
       i++;
