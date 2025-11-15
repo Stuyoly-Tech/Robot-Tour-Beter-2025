@@ -93,7 +93,8 @@ void setup() {
   STATE = INIT;
 
   Serial.begin(9600);
-
+  delay(100);
+  Serial.println("Starting...");
   Wire.begin(17, 18);
   Wire.setClock(400000L);
 
@@ -474,10 +475,23 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   for (int i = 0; i < 5; i++) {
     buff[i] = file.read();
   }
+
   TARGET_TIME = atof(buff);
   file.read();
 
-  //skip line (skips "BOTTLE?:")
+  //PATH LENGTH
+  memset(buff, 0, sizeof(buff));
+   while (file.available()) {
+    if (file.read() == '\n') {
+      break;
+    }
+  }
+  for (int i = 0; i < 2; i++){
+    buff[i] = file.read();
+  }
+  PATH_SIZE = atoi(buff);
+  
+  //skip line (skips "PATH:")
   while (file.available()) {
     if (file.read() == '\n') {
       break;
@@ -596,40 +610,11 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     }
   }
 */
-//Bottle Stuff Start
-  for (byte i = 0; i < BOTTLE_SIZE; i++) {
-    buff[0] = '0';
-    buff[1] = file.read();
-    file.read();
-    //true/false
-    boolean BOTTLE_STATE = false;
-    switch (buff[1]) {
-      case 'T':
-        BOTTLE_STATE = true;
-        break;
-      case 'F':
-        BOTTLE_STATE = false;
-        break;
-      default:
-        Serial.printf("bad_bottle! '%c%c'\n", buff[0], buff[1]);
-        return false;
-    }
-    BOTTLES[i] = BOTTLE_STATE;
-    
-    //Skip to next line (Skips "PATH:")
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-  }
-  //Bottle Stuff End
-
-  //bool firstDone = false;
   //Read in paths
-  while (file.available()) {
+  for (int i=0; i < PATH_SIZE; i++) {
     buff[0] = file.read();
     buff[1] = file.read();
+    PATH_SIZE++;
     //coords
     float pX, pY;
     switch (buff[0]) {
@@ -667,7 +652,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         pX = 2500;
         break;
       default:
-        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
+        Serial.printf("bad_gate_y! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
     switch (buff[1]) {
@@ -705,9 +690,40 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         pY = 2500;
         break;
       default:
-        Serial.println("bad_gate!");
+        Serial.printf("bad_gate_x!, '%c%c'\n", buff[0], buff[1]);
         return false;
     }
+//Bottle Stuff Start
+    while (file.available()) {
+      if (file.read() == '\n') {
+        break;
+      }
+    }
+  for (byte i = 0; i < PATH_SIZE; i++) {
+    buff[0] = file.read();
+    file.read();
+    //true/false
+    boolean BOTTLE_STATE = false;
+    switch (buff[0]) {
+      case 'T':
+        BOTTLE_STATE = true;
+        break;
+      case 'F':
+        BOTTLE_STATE = false;
+        break;
+      default:
+        Serial.printf("bad_bottle! '%c%c'\n", buff[0]);
+        return false;
+    }
+    BOTTLES[i] = BOTTLE_STATE;
+    
+    //Skip to next line (Skips "PATH:")
+
+  }
+  //Bottle Stuff End
+
+  //bool firstDone = false;
+
    
     /*
     if (!firstDone) {
