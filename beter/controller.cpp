@@ -57,12 +57,13 @@ void Controller::gyroInit() {
   gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
   
   imu->setConfig(gyroConfig);
-
+  
   delay(2000);
   
   imu->beginI2C(IMU_ADDRESS);
   imu->performComponentRetrim();
   imu->performGyroOffsetCalibration();
+
  
   float sum = 0;
   t_0 = micros()/pow(10, 6);
@@ -71,7 +72,7 @@ void Controller::gyroInit() {
     float t = micros()/pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu->getSensorData();
-      float omega = (imu->data.gyroZ)*PI/360.0;
+      float omega = (imu->data.gyroZ)*PI/180.0;
       sum += omega;
       t_0 = t;
       i++;
@@ -85,7 +86,8 @@ void Controller::update() {
   updateTheta();
   float deltaTheta = thetaSetPoint - theta;
   //debugSerial->println(deltaTheta);
-  //debugSerial->println(theta);
+  //debugSerial->
+  Serial.println(theta);
 
   switch (state) {
     case 0:
@@ -149,11 +151,13 @@ void Controller::updateTheta() {
     //Update theta
     imu->getSensorData();
 
-    //debugSerial->printf("IMU: %f, imu->data.gyroZ);
+    //debugSerial->
+    //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
     
-    float omega = (imu->data.gyroZ)*PI/180.0 - gyroOffset+ COUNTER_BIAS;
+    float omega = (imu->data.gyroZ)*PI/180.0;
 
-    //debugSerial->printf("OMEGA: %f\n", omega);
+    //debugSerial->
+    //Serial.printf("OMEGA: %f\n", omega);
 
     float dTheta = (omega)*(t_now - t_0);
 
@@ -248,4 +252,9 @@ void Controller::turnTheta(float targetTheta) {
 
 void Controller::setVx(float newVx) {
   vx = newVx;
+}
+
+float Controller::getGyroZ() {
+  imu->getSensorData();
+  return imu->data.gyroZ;  // degrees per second
 }

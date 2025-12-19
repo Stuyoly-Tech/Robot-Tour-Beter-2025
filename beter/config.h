@@ -5,7 +5,7 @@
 #define VREF_VOLTAGE 0.9447
 #define DAC_ADDRESS 0xD//0b00011011
 
-#define STEPS_PER_REV 200*8 //microsteps are controlled by dipswitch
+#define STEPS_PER_REV 200*32 //microsteps are controlled by dipswitch
 
 //Screen
 #define SCREEN_WIDTH 128

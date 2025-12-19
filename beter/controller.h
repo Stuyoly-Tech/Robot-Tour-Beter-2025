@@ -27,6 +27,7 @@ class Controller {
 
     float vx;
     float gyroOffset;
+    
 
     //Control variables (mostly for P controller on theta)
     float t_0;
@@ -48,6 +49,7 @@ class Controller {
     void init(float iTheta);
     void init();
     void gyroInit();
+    float getGyroZ();
 
     void update();
     void updateTheta();

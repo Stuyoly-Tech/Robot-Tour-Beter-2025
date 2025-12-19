@@ -31,11 +31,6 @@ uint8_t PATH_SIZE;
 Vector2f GATES[7];
 uint8_t GATE_SIZE;
 
-//Bottles
-boolean BOTTLES[7];
-bool prevBottleState = false;
-uint8_t BOTTLE_SIZE;
-
 //Paramters
 float TARGET_TIME;
 
@@ -53,7 +48,22 @@ uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
 bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
-boolean loadPathFromSD(fs::FS &fs);
+// ===== Function Prototypes =====
+void displayScreen(int state);
+
+bool BTN_STATE(uint8_t index);
+
+void encoderInterruptHandlerA();
+void encoderInterruptHandlerB();
+
+boolean LOADPATHFROMSD(fs::FS &fs);
+
+void testTurns();
+void testDist();
+void testSquare();
+
+void ENGAGESTEPPERS(void *parameter);
+
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
@@ -92,9 +102,8 @@ void setup() {
   //start init
   STATE = INIT;
 
-  Serial.begin(9600);
-  delay(100);
-  Serial.println("Starting...");
+  Serial.begin(115200);
+  Serial.println("on");
   Wire.begin(17, 18);
   Wire.setClock(400000L);
 
@@ -149,6 +158,7 @@ void setup() {
 
 
   //Init Gyros
+  
   STATE = INIT;
   displayScreen(STATE);
 
@@ -158,6 +168,7 @@ void setup() {
   //sd init
   //Serial.println("2");  gyroOffset = 0;
   SPI.begin(SD_CLK, SD_MISO, SD_MOSI, SD_CS);
+  Serial.println("Checking SD");
   if (!SD.begin(SD_CS, SPI)) {
     Serial.println("SD Initialization failed!");
   } else {
@@ -178,11 +189,12 @@ void setup() {
     STATE = IDLE;
     displayScreen(STATE);
   }
-  File bmiData = SD.open("/bmi_data.csv", FILE_WRITE);
+  //ROBOTCONTROLLER.gyroInit();
   //digitalWrite(BUZZER, HIGH);
 }
 
 void loop() {
+  //ROBOT.update();
   //ROBOTCONTROLLER.updateTheta();
   //Serial.println(ROBOTCONTROLLER.theta);
   vTaskDelay(1);
@@ -194,7 +206,7 @@ void loop() {
         STATE = INIT;
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
-        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, BOTTLES, BOTTLE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -218,9 +230,9 @@ void loop() {
       }
       break;
     case READY:
+             //ROBOTCONTROLLER.gyroInit();
       if (BTN_STATE(0)) {
         if (PATH_MODE == 2) {
-          ROBOTCONTROLLER.gyroInit();
           beep();
           testTurns();
         }
@@ -230,13 +242,16 @@ void loop() {
         if(PATH_MODE == 4){
           testSquare();
         }
+       if (PATH_MODE == 1){
+        ROBOT.startPath();
+       }
         digitalWrite(LASER, LOW);
         digitalWrite(LED_0, HIGH);
         digitalWrite(LED_1, HIGH);
-        ROBOT.startPath();
         STATE = RUNNING;
+        ROBOT.update();
         displayScreen(STATE);
-        ROBOTCONTROLLER.theta = PI / 2;
+        ROBOTCONTROLLER.updateTheta();
       }
       if (BTN_STATE(1)) {
         STATE = IDLE;
@@ -259,19 +274,7 @@ void loop() {
       break;
     case RUNNING:
       ROBOT.update();
-      /*
-      int value = analogRead(SENSOR_PIN);
-      unsigned long t = millis();
-      // Log to SD
-      if (dataFile) {
-        bmiFile.print(t);
-        bmiFile.print(",");
-        dataFile.println(value);
-      }
-      // Send to Serial for graphing
-      Serial.println(value);
-      */
-      delay(10); // sample rate
+      //Serial.println(ROBOTCONTROLLER.getGyroZ());
       if (BTN_STATE(0) || BTN_STATE(1) || BTN_STATE(2) || BTN_STATE(3) || BTN_STATE(4)) {
         STATE = STOPPED;
         digitalWrite(LED_0, LOW);
@@ -432,22 +435,23 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
      1
      TARGET TIME:
      50.00
-     BOTTLE?:
-     F
-     F
-     T
-     F
-     F
-     F
+     NUM GATES:
+     4
+     GATES:
+     A1
+     ...
      PATH:
      A1
      B2
      ...
   */
+  Serial.println("Reading file...");
   File file = fs.open(PATH_FILE);
   if (!file) {
     Serial.println("no_file!");
     return false;
+  }else {
+    Serial.println("file");
   }
   PATH_SIZE = 0;
   char buff[10];
@@ -465,39 +469,27 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   PATH_MODE = atoi(buff);
   file.read();
 
+  //read in target time
+
   //skip first line until newline is reached
   while (file.available()) {
     if (file.read() == '\n') {
       break;
     }
   }
-  //read in target time
   for (int i = 0; i < 5; i++) {
     buff[i] = file.read();
   }
-
   TARGET_TIME = atof(buff);
   file.read();
 
-  //PATH LENGTH
-  memset(buff, 0, sizeof(buff));
-   while (file.available()) {
-    if (file.read() == '\n') {
-      break;
-    }
-  }
-  for (int i = 0; i < 2; i++){
-    buff[i] = file.read();
-  }
-  PATH_SIZE = atoi(buff);
-  
-  //skip line (skips "PATH:")
+  //skip line
   while (file.available()) {
     if (file.read() == '\n') {
       break;
     }
   }
-/*
+
   //read in gate number
   buff[0] = '0';
   buff[1] = file.read();
@@ -510,10 +502,13 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       break;
     }
   }
+
   //Read in Gates
   for (byte i = 0; i < GATE_SIZE; i++) {
     buff[0] = file.read();
     buff[1] = file.read();
+    Serial.println(buff[0]);
+    Serial.println(buff[1]);
     //coords
     float pX, pY;
     switch (buff[0]) {
@@ -609,12 +604,11 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       break;
     }
   }
-*/
+  bool firstDone = false;
   //Read in paths
-  for (int i=0; i < PATH_SIZE; i++) {
+  while (file.available()) {
     buff[0] = file.read();
     buff[1] = file.read();
-    PATH_SIZE++;
     //coords
     float pX, pY;
     switch (buff[0]) {
@@ -648,11 +642,11 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'J':
         pX = 2250;
         break;
-      case 'K':
+       case 'K':
         pX = 2500;
         break;
       default:
-        Serial.printf("bad_gate_y! '%c%c'\n", buff[0], buff[1]);
+        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
     switch (buff[1]) {
@@ -690,60 +684,17 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         pY = 2500;
         break;
       default:
-        Serial.printf("bad_gate_x!, '%c%c'\n", buff[0], buff[1]);
+        Serial.println("bad_gate!");
         return false;
     }
-//Bottle Stuff Start
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
-    }
-  for (byte i = 0; i < PATH_SIZE; i++) {
-    buff[0] = file.read();
-    file.read();
-    //true/false
-    boolean BOTTLE_STATE = false;
-    switch (buff[0]) {
-      case 'T':
-        BOTTLE_STATE = true;
-        break;
-      case 'F':
-        BOTTLE_STATE = false;
-        break;
-      default:
-        Serial.printf("bad_bottle! '%c%c'\n", buff[0]);
-        return false;
-    }
-    BOTTLES[i] = BOTTLE_STATE;
-    
-    //Skip to next line (Skips "PATH:")
-
-  }
-  //Bottle Stuff End
-
-  //bool firstDone = false;
-
    
-    /*
     if (!firstDone) {
       PATH[PATH_SIZE] = Vector2f(pX, -DIST_TO_DOWEL);
       PATH_SIZE++;
       firstDone = true;
     }
-    */
     PATH[PATH_SIZE] = Vector2f(pX, pY);
     PATH_SIZE++;
-    /*
-    if(BOTTLE_STATE){
-      BOTTLES[BOTTLE_SIZE] = true;
-      BOTTLE_SIZE++;
-    }
-    else{
-      BOTTLES[BOTTLE_SIZE] = false;
-      BOTTLE_SIZE++;
-    }
-    */
     while (file.available()) {
       if (file.read() == '\n') {
         break;
@@ -813,6 +764,9 @@ void testDist() {
 
 void testSquare(){
   delay(2000);
+  Serial.println("squaring");
+  displayScreen(67);
+  delay(50000);
   ROBOT.init(1);
   ROBOTCONTROLLER.setVx(MAX_VEL);
   STATE = RUNNING;
@@ -1151,6 +1105,9 @@ void displayScreen(int state) {
       SCREEN.setTextSize(1);
       SCREEN.println("THETA:");
       SCREEN.println(ROBOTCONTROLLER.theta);
+    case 67:
+      SCREEN.print("squareing");
+      
   }
   SCREEN.display();
   //Serial.println("SCREEN REFRESH");

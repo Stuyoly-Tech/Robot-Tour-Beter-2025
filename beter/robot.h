@@ -39,7 +39,6 @@ class Robot {
     void startPath();
     float stopPath();
     int getState();
-    //bool BOTTLE_STATE();
 
 };
 

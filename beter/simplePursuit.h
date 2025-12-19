@@ -15,7 +15,6 @@ class simplePursuit {
 
     int pathSize;
     int gateSize;
-    int bottleSize;
     int prevPointIndex;
     int currentGoalPointIndex;
 
@@ -34,7 +33,6 @@ class simplePursuit {
     float limitOmega;
     
     float getDist(Vector2f p1, Vector2f p2);
-    bool* bottles;
     
   public:
     //simplePursuit();
@@ -42,8 +40,6 @@ class simplePursuit {
     void init(
       Vector2f *iPath, int iPathSize, 
       Vector2f *iGates, int iGateSize, 
-      bool* iBottles,
-      int iBottleSize, 
       float iTargetTime, 
       float iFinalOffsetY, float iFinalOffsetX
     );
@@ -66,9 +62,6 @@ class simplePursuit {
 
     //Average speed needed to complete track on time
     float getEndVx(float t, float d);
-
-    //Bottle Stuff
-    boolean hasABottle();
 };
 
 #endif

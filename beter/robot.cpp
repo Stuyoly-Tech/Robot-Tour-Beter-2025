@@ -73,9 +73,7 @@ void Robot::update() {
       }
   
       //correct heading first;
-      if (abs(abs(deltaTheta) - PI) < 0.03 
-          && !(robotSimplePursuit->hasABottle())
-          ) {   
+      if (abs(abs(deltaTheta) - PI) < 0.03) {   
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }
@@ -139,9 +137,3 @@ int Robot::getState() {
 float Robot::sgn(float n) {
   return (n < 0) ? -1 : 1;
 }
-
-/*
-bool Robot::BOTTLE_STATE(){
-
-}
-*/
