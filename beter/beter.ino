@@ -206,7 +206,7 @@ void loop() {
         STATE = INIT;
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
-        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, GATES, GATE_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -225,12 +225,11 @@ void loop() {
         displayScreen(STATE);
         ROBOTCONTROLLER.gyroInit();
         beep();
-        STATE = READY;
+        STATE = IDLE;
         displayScreen(STATE);
       }
       break;
     case READY:
-             //ROBOTCONTROLLER.gyroInit();
       if (BTN_STATE(0)) {
         if (PATH_MODE == 2) {
           beep();
@@ -251,7 +250,6 @@ void loop() {
         STATE = RUNNING;
         ROBOT.update();
         displayScreen(STATE);
-        ROBOTCONTROLLER.updateTheta();
       }
       if (BTN_STATE(1)) {
         STATE = IDLE;
@@ -435,11 +433,6 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
      1
      TARGET TIME:
      50.00
-     NUM GATES:
-     4
-     GATES:
-     A1
-     ...
      PATH:
      A1
      B2
@@ -487,114 +480,6 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   while (file.available()) {
     if (file.read() == '\n') {
       break;
-    }
-  }
-
-  //read in gate number
-  buff[0] = '0';
-  buff[1] = file.read();
-  GATE_SIZE = atoi(buff);
-  file.read();
-
-  //Skip line
-  while (file.available()) {
-    if (file.read() == '\n') {
-      break;
-    }
-  }
-
-  //Read in Gates
-  for (byte i = 0; i < GATE_SIZE; i++) {
-    buff[0] = file.read();
-    buff[1] = file.read();
-    Serial.println(buff[0]);
-    Serial.println(buff[1]);
-    //coords
-    float pX, pY;
-    switch (buff[0]) {
-      case 'A':
-        pX = 0;
-        break;
-      case 'B':
-        pX = 250;
-        break;
-      case 'C':
-        pX = 500;
-        break;
-      case 'D':
-        pX = 750;
-        break;
-      case 'E':
-        pX = 1000;
-        break;
-      case 'F':
-        pX = 1250;
-        break;
-      case 'G':
-        pX = 1500;
-        break;
-      case 'H':
-        pX = 1750;
-        break;
-      case 'I':
-        pX = 2000;
-        break;
-      case 'J':
-        pX = 2250;
-        break;
-       case 'K':
-        pX = 2500;
-        break;
-      default:
-        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
-        return false;
-    }
-    switch (buff[1]) {
-      case '1':
-        pY = 0;
-        break;
-      case '2':
-        pY = 250;
-        break;
-      case '3':
-        pY = 500;
-        break;
-      case '4':
-        pY = 750;
-        break;
-      case '5':
-        pY = 1000;
-        break;
-      case '6':
-        pY = 1250;
-        break;
-      case '7':
-        pY = 1500;
-        break;
-      case '8':
-        pY = 1750;
-        break;
-      case '9':
-        pY = 2000;
-        break;
-      case 'A':
-        pY = 2250;
-        break;
-      case 'B':
-        pY = 2500;
-        break;
-      default:
-        Serial.println("bad_gate!");
-        return false;
-    }
-
-    GATES[i] = Vector2f(pX, pY);
-
-    //Skip to next line
-    while (file.available()) {
-      if (file.read() == '\n') {
-        break;
-      }
     }
   }
 
@@ -646,7 +531,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         pX = 2500;
         break;
       default:
-        Serial.printf("bad_gate! '%c%c'\n", buff[0], buff[1]);
+        Serial.printf("bad_coordinate! '%c%c'\n", buff[0], buff[1]);
         return false;
     }
     switch (buff[1]) {

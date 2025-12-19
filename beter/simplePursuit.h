@@ -11,10 +11,8 @@ using namespace Eigen;
 class simplePursuit {
   private:
     Vector2f *path;
-    Vector2f *gates;
 
     int pathSize;
-    int gateSize;
     int prevPointIndex;
     int currentGoalPointIndex;
 
@@ -39,7 +37,6 @@ class simplePursuit {
     
     void init(
       Vector2f *iPath, int iPathSize, 
-      Vector2f *iGates, int iGateSize, 
       float iTargetTime, 
       float iFinalOffsetY, float iFinalOffsetX
     );
@@ -52,7 +49,6 @@ class simplePursuit {
 
     //Stuff
     boolean atLastPoint();
-    boolean isAGate();
 
     //Distance needed to be traveled from point a to b
     float getCurrentGoalPointDist();

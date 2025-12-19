@@ -22,7 +22,7 @@
 //in mm
 #define WHEEL_RADIUS 40.6
 #define TRACK_WIDTH 146.2
-#define DIST_TO_DOWEL 85
+#define DIST_TO_DOWEL 91.37500
 #define RIGHT_OFF 1
 
 //Kinematics

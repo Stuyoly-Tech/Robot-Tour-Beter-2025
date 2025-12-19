@@ -13,13 +13,10 @@ float simplePursuit::getDist(Vector2f p1, Vector2f p2) {
 //path will never be larger than 100
 void simplePursuit::init(
   Vector2f *iPath, int iPathSize,
-  Vector2f *iGates, int iGateSize,
   float iTargetTime,
   float iFinalOffsetY, float iFinalOffsetX) {
   path = iPath;
   pathSize = iPathSize;
-  gates = iGates;
-  gateSize = iGateSize;
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
   finalOffsetY = iFinalOffsetY;
@@ -52,15 +49,6 @@ void simplePursuit::nextPoint() {
 
 boolean simplePursuit::atLastPoint() {
   return (currentGoalPointIndex == pathSize - 1);
-}
-
-boolean simplePursuit::isAGate() {
-  for (int i = 0; i < gateSize; i++) {
-    if (path[currentGoalPointIndex] == gates[i]) {
-      return true;
-    }
-  }
-  return false;
 }
 
 float simplePursuit::getCurrentGoalPointDist() {
