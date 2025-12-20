@@ -34,7 +34,7 @@ void Robot::update() {
 
     //deciding forward movement 
     case 1:
-      dist = robotSimplePursuit->getCurrentGoalPointDist();
+      dist = robotSimplePursuit->getCurrentGoalPointDist(robotController->position);
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
         robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, dist));
@@ -61,7 +61,7 @@ void Robot::update() {
     //deciding turns
     case 3:
       robotSimplePursuit->nextPoint();
-      theta = robotSimplePursuit->getTheta();
+      theta = robotSimplePursuit->getTheta(robotController->position);
       deltaTheta = theta - robotController->thetaSetPoint;
       debugSerial->println(deltaTheta);
     
@@ -97,7 +97,7 @@ void Robot::update() {
     case 5:
       //go backwards
       if (robotController->state == 0) {
-        dist = robotSimplePursuit->getCurrentGoalPointDist();
+        dist = robotSimplePursuit->getCurrentGoalPointDist(robotController->position);
 
         if (robotSimplePursuit->atLastPoint()) {
           dist += DIST_TO_DOWEL; 

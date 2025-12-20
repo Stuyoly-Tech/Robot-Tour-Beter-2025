@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
 #include <SparkFun_BMI270_Arduino_Library.h>
+#include <ArduinoEigenDense.h>
+using namespace Eigen;
 
 #include "utils.h"
 #include "config.h"
@@ -41,8 +43,14 @@ void Controller::init() {
   state = 0;
   theta = 0;
   thetaSetPoint = 0;
+  position = Vector2f(0, 0);
   vx = 0;
   t_0 = micros() / pow(10, 6);
+  dt = 0;
+  lastPosL = 0;
+  lastPosR = 0;
+  stepperL->setCurrentPosition(0);
+  stepperR->setCurrentPosition(0);
 }
 
 void Controller::gyroInit() {
@@ -55,39 +63,41 @@ void Controller::gyroInit() {
   gyroConfig.cfg.gyr.filter_perf = BMI2_PERF_OPT_MODE;
   gyroConfig.cfg.gyr.range = BMI2_GYR_RANGE_500;
   gyroConfig.cfg.gyr.noise_perf = BMI2_PERF_OPT_MODE;
-  
+
   imu->setConfig(gyroConfig);
-  
-  delay(1000);
-  
+
+
   imu->beginI2C(IMU_ADDRESS);
   imu->performComponentRetrim();
   imu->performGyroOffsetCalibration();
 
- 
+  delay(1000);
+
   float sum = 0;
-  t_0 = micros()/pow(10, 6);
+  t_0 = micros() / pow(10, 6);
   //Begin reading
-  for (int i=0; i<250; ) {
-    float t = micros()/pow(10, 6);
+  for (int i = 0; i < 250;) {
+    float t = micros() / pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu->getSensorData();
-      float omega = (imu->data.gyroZ)*PI/180.0;
+      float omega = (imu->data.gyroZ) * PI / 180.0;
       sum += omega;
       t_0 = t;
       i++;
     }
   }
-  gyroOffset = sum/250;
+  gyroOffset = sum / 250;
 }
 
 
 void Controller::update() {
+  //Serial.println(dt);
   updateTheta();
+
   float deltaTheta = thetaSetPoint - theta;
   //debugSerial->println(deltaTheta);
   //debugSerial->
-  Serial.println(theta);
+  //Serial.println(theta);
 
   switch (state) {
     case 0:
@@ -95,7 +105,9 @@ void Controller::update() {
 
     case 1:
       stepperL->run();
+
       stepperR->run();
+      
       if (steppersEngaged_mtx->try_lock()) {
         state = 0;
         steppersEngaged_mtx->unlock();
@@ -111,15 +123,15 @@ void Controller::update() {
       }
       if (abs(thetaSetPoint - theta) < 0.001) {
         steppersEngaged_mtx->lock();
-        stepperL->setCurrentPosition(stepperL->targetPosition());
-        stepperR->setCurrentPosition(stepperR->targetPosition());
+        //stepperL->setCurrentPosition(stepperL->targetPosition());
+        //stepperR->setCurrentPosition(stepperR->targetPosition());
         steppersEngaged_mtx->unlock();
         state = 0;
       } else {
         int steps = mm_to_steps(0.5 * TRACK_WIDTH * deltaTheta, WHEEL_RADIUS, STEPS_PER_REV);
         steppersEngaged_mtx->lock();
-        stepperL->setCurrentPosition(stepperL->targetPosition());
-        stepperR->setCurrentPosition(stepperR->targetPosition());
+        //stepperL->setCurrentPosition(stepperL->targetPosition());
+        //stepperR->setCurrentPosition(stepperR->targetPosition());
         stepperL->move(-steps);
         stepperR->move(steps);
         steppersEngaged_mtx->unlock();
@@ -146,22 +158,27 @@ void Controller::update() {
 }
 
 void Controller::updateTheta() {
-  float t_now = micros() / pow(10, 6);
-  if (t_now - t_0 > IMU_UPDATE_PERIOD) {
+  dt = micros() / pow(10, 6) - t_0;
+
+  if (dt > IMU_UPDATE_PERIOD) {
+    Serial.println(theta);
+    Serial.println(position(0));
+    Serial.println(position(1));
+
     //Update theta
     imu->getSensorData();
 
     //debugSerial->
     //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
-    
-    float omega = (imu->data.gyroZ)*PI/180.0;
-    float omega0 = PI/980;//right biased: 975 left biased: 980
+
+    float omega = (imu->data.gyroZ) * PI / 180.0;
+    float omega0 = PI / 980;  //right biased: 975 left biased: 980
     //Serial.println(imu->data.gyroZ);
 
     //debugSerial->
     //Serial.printf("OMEGA: %f\n", omega);
 
-    float dTheta = (omega + omega0)*(t_now - t_0);
+    float dTheta = (omega + omega0) * (dt);
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {
@@ -175,9 +192,20 @@ void Controller::updateTheta() {
     while (theta < -PI) {
       theta += TWO_PI;
     }
-
-    t_0 = t_now;
+    updatePosition();
+    t_0 = micros() / pow(10, 6);
   }
+}
+
+void Controller::updatePosition() {
+  float dxL = stepperL->currentPosition() - lastPosL;
+  float dxR = stepperR->currentPosition() - lastPosR;
+  position(0) += steps_to_mm(dxL) * cos(theta) / 2;
+  position(0) += steps_to_mm(dxR) * cos(theta) / 2;
+  position(1) += steps_to_mm(dxL) * sin(theta) / 2;
+  position(1) += steps_to_mm(dxR) * sin(theta) / 2;
+  lastPosL = stepperL->currentPosition();
+  lastPosR = stepperR->currentPosition();
 }
 
 void Controller::moveX(float dist) {
@@ -191,15 +219,15 @@ void Controller::moveX(float dist) {
 
     //set accel and vel
     stepperL->setAcceleration(maxA);
-    stepperR->setAcceleration(maxA*RIGHT_OFF);
+    stepperR->setAcceleration(maxA * RIGHT_OFF);
     stepperL->setMaxSpeed(maxV);
-    stepperR->setMaxSpeed(maxV*RIGHT_OFF);
+    stepperR->setMaxSpeed(maxV * RIGHT_OFF);
     stepperL->setSpeed(maxV);
-    stepperR->setSpeed(maxV*RIGHT_OFF);
+    stepperR->setSpeed(maxV * RIGHT_OFF);
 
     //set wheel positions
     stepperL->move(steps);
-    stepperR->move(steps*RIGHT_OFF);
+    stepperR->move(steps * RIGHT_OFF);
 
     //Unlock steppers
     steppersEngaged_mtx->unlock();
@@ -222,11 +250,11 @@ void Controller::turnTheta(float targetTheta) {
 
   //set accel and vel
   stepperL->setAcceleration(maxAlpha);
-  stepperR->setAcceleration(maxAlpha*RIGHT_OFF);
+  stepperR->setAcceleration(maxAlpha * RIGHT_OFF);
   stepperL->setMaxSpeed(maxOmega);
-  stepperR->setMaxSpeed(maxOmega*RIGHT_OFF);
+  stepperR->setMaxSpeed(maxOmega * RIGHT_OFF);
   stepperL->setSpeed(maxOmega);
-  stepperR->setSpeed(maxOmega*RIGHT_OFF);
+  stepperR->setSpeed(maxOmega * RIGHT_OFF);
 
   //set wheel positions
   thetaSetPoint = targetTheta;
@@ -245,9 +273,6 @@ void Controller::turnTheta(float targetTheta) {
   //Create task
   xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
 
-  //Update time
-  t_0 = micros() / pow(10, 6);
-
   //Change state
   state = 2;
 }
@@ -259,4 +284,8 @@ void Controller::setVx(float newVx) {
 float Controller::getGyroZ() {
   imu->getSensorData();
   return imu->data.gyroZ;  // degrees per second
+}
+
+void Controller::setPos(Vector2f p) {
+  position = p;
 }

@@ -6,6 +6,8 @@
 #include <AccelStepper.h>
 #include <SparkFun_BMI270_Arduino_Library.h>
 #include <HardwareSerial.h>
+#include <ArduinoEigenDense.h>
+using namespace Eigen;
 
 #include "utils.h"
 #include "config.h"
@@ -31,8 +33,11 @@ class Controller {
 
     //Control variables (mostly for P controller on theta)
     float t_0;
+    float dt;
+    float lastPosL;
+    float lastPosR;
   public:
-
+    Vector2f position;
     int state;
     float theta;
     float thetaSetPoint;
@@ -53,11 +58,14 @@ class Controller {
 
     void update();
     void updateTheta();
+    void updatePosition();
 
     void moveX(float dist);
     void turnTheta(float targetTheta);
 
     void setVx(float newVx);
+
+    void setPos(Vector2f p);
 };
 
 #endif

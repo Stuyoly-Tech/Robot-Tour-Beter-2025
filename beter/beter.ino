@@ -27,6 +27,8 @@ int STATE;
 Vector2f PATH[100];  //= {Vector2d(0, 0), Vector2d(0, 300), Vector2d(300, 300), Vector2d(300, 0), Vector2d(0, 0)};
 uint8_t PATH_SIZE;
 
+Vector2f INITIAL_POSITION;
+
 //Gates
 Vector2f GATES[7];
 uint8_t GATE_SIZE;
@@ -65,7 +67,6 @@ void testDist();
 void testSquare();
 
 void ENGAGESTEPPERS(void *parameter);
-
 
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
@@ -209,6 +210,10 @@ void loop() {
         displayScreen(STATE);
         ROBOT.init(PATH_MODE);
         ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        Serial.println(INITIAL_POSITION(0));
+        Serial.println(INITIAL_POSITION(1));
+        Serial.println(sin(PI/2));
+        ROBOTCONTROLLER.setPos(INITIAL_POSITION);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
@@ -593,6 +598,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     if (!firstDone) {
       PATH[PATH_SIZE] = Vector2f(pX, -DIST_TO_DOWEL);
       PATH_SIZE++;
+      INITIAL_POSITION = Vector2f(pX, -DIST_TO_DOWEL);
       firstDone = true;
     }
     PATH[PATH_SIZE] = Vector2f(pX, pY);

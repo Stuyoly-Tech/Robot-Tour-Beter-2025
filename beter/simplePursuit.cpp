@@ -20,19 +20,12 @@ void simplePursuit::init(
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
   finalOffsetY = iFinalOffsetY;
-
-  prevPointIndex = 0;
   currentGoalPointIndex = 1;
 
   path[pathSize - 1] = Vector2f(path[pathSize - 1](0) + finalOffsetX, path[pathSize - 1](1) + finalOffsetY);
 
   //Calculate pathTotalDist and avgVx
   endVx = 0;
-  pathTotalDist -= DIST_TO_DOWEL;
-
-  for (int i = 1; i < pathSize; i++) {
-    pathTotalDist += getDist(path[i], path[i - 1]);
-  }
 }
 
 int simplePursuit::getPathIndexCount() {
@@ -40,9 +33,7 @@ int simplePursuit::getPathIndexCount() {
 }
 
 void simplePursuit::nextPoint() {
-  pathTotalDist -= getDist(path[prevPointIndex], path[currentGoalPointIndex]);
   if (currentGoalPointIndex < pathSize) {
-    prevPointIndex++;
     currentGoalPointIndex++;
   }
 }
@@ -51,14 +42,15 @@ boolean simplePursuit::atLastPoint() {
   return (currentGoalPointIndex == pathSize - 1);
 }
 
-float simplePursuit::getCurrentGoalPointDist() {
-  return getDist(path[currentGoalPointIndex], path[prevPointIndex]);
+float simplePursuit::getCurrentGoalPointDist(Vector2f p) {
+  return getDist(path[currentGoalPointIndex], p);
 }
 
-float simplePursuit::getTheta() {
+float simplePursuit::getTheta(Vector2f p) {
   return atan2(
-    path[currentGoalPointIndex](1) - path[prevPointIndex](1),
-    path[currentGoalPointIndex](0) - path[prevPointIndex](0));
+    path[currentGoalPointIndex](1) - p(1),
+    path[currentGoalPointIndex](0) - p(0)
+  );
 }
 
 float simplePursuit::getEndVx(float t, float d) {
@@ -66,11 +58,10 @@ float simplePursuit::getEndVx(float t, float d) {
   float a = MAX_ACC;
   Serial.println(d);
   Serial.println(t);
-  if((a*remTime - a*sqrt(sq(remTime)-4*d/a))/2 < MAX_VEL){
-    Serial.println((a*remTime - a*sqrt(sq(remTime)-4*d/a))/2);
-    return (a*remTime - a*sqrt(sq(remTime)-4*d/a))/2;
-  }
-  else{
+  if ((a * remTime - a * sqrt(sq(remTime) - 4 * d / a)) / 2 < MAX_VEL) {
+    Serial.println((a * remTime - a * sqrt(sq(remTime) - 4 * d / a)) / 2);
+    return (a * remTime - a * sqrt(sq(remTime) - 4 * d / a)) / 2;
+  } else {
     return MAX_VEL;
   }
 }

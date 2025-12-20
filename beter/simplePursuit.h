@@ -13,11 +13,9 @@ class simplePursuit {
     Vector2f *path;
 
     int pathSize;
-    int prevPointIndex;
     int currentGoalPointIndex;
 
     float centerToDowel; 
-    float pathTotalDist; 
     float targetTime;
 
     float finalOffsetX;
@@ -51,10 +49,10 @@ class simplePursuit {
     boolean atLastPoint();
 
     //Distance needed to be traveled from point a to b
-    float getCurrentGoalPointDist();
+    float getCurrentGoalPointDist(Vector2f p);
 
     //Requried heading to go from point a to b
-    float getTheta();
+    float getTheta(Vector2f p);
 
     //Average speed needed to complete track on time
     float getEndVx(float t, float d);
