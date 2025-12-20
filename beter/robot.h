@@ -36,6 +36,8 @@ class Robot {
     void init();
     void init(int iPathMode);
     void update();
+    void setPos(Vector2f r);
+    void updatePos();
     void startPath();
     float stopPath();
     int getState();

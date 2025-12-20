@@ -47,7 +47,7 @@ void Controller::init() {
 
 void Controller::gyroInit() {
   //Configure IMUs
-  
+  delay(1000);
   bmi2_sens_config gyroConfig;
   gyroConfig.type = BMI2_GYRO;
   gyroConfig.cfg.gyr.odr = BMI2_GYR_ODR_200HZ;
@@ -58,7 +58,7 @@ void Controller::gyroInit() {
   
   imu->setConfig(gyroConfig);
   
-  delay(2000);
+  delay(1000);
   
   imu->beginI2C(IMU_ADDRESS);
   imu->performComponentRetrim();
@@ -94,8 +94,8 @@ void Controller::update() {
       break;
 
     case 1:
-      //stepperL->run();
-      //stepperR->run();
+      stepperL->run();
+      stepperR->run();
       if (steppersEngaged_mtx->try_lock()) {
         state = 0;
         steppersEngaged_mtx->unlock();
@@ -109,7 +109,7 @@ void Controller::update() {
       } else if (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-      if (abs(thetaSetPoint - theta) < 0.0025) {
+      if (abs(thetaSetPoint - theta) < 0.001) {
         steppersEngaged_mtx->lock();
         stepperL->setCurrentPosition(stepperL->targetPosition());
         stepperR->setCurrentPosition(stepperR->targetPosition());
@@ -155,11 +155,13 @@ void Controller::updateTheta() {
     //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
     
     float omega = (imu->data.gyroZ)*PI/180.0;
+    float omega0 = PI/980;//right biased: 975 left biased: 980
+    //Serial.println(imu->data.gyroZ);
 
     //debugSerial->
     //Serial.printf("OMEGA: %f\n", omega);
 
-    float dTheta = (omega)*(t_now - t_0);
+    float dTheta = (omega + omega0)*(t_now - t_0);
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {

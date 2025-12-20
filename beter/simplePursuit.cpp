@@ -64,22 +64,13 @@ float simplePursuit::getTheta() {
 float simplePursuit::getEndVx(float t, float d) {
   float remTime = targetTime - t;
   float a = MAX_ACC;
-  //Serial.println(a);
-  //Serial.println(d);
-  //Serial.println(remTime);
-  /*
-  if (a * a * remTime * remTime - 4 * a * d > 0) {
-    endVx = (a * remTime - sqrt(a * a * remTime * remTime - 4 * a * d)) / 2;
-  } else {
-    //Serial.println(endVx);
-    endVx = MAX_VEL;
-    //Serial.println("SET MAX VX");
+  Serial.println(d);
+  Serial.println(t);
+  if((a*remTime - a*sqrt(sq(remTime)-4*d/a))/2 < MAX_VEL){
+    Serial.println((a*remTime - a*sqrt(sq(remTime)-4*d/a))/2);
+    return (a*remTime - a*sqrt(sq(remTime)-4*d/a))/2;
   }
-  */
-  endVx = d / remTime;
-  if(endVx > MAX_VEL || remTime <= 0){
-    endVx = MAX_VEL;
+  else{
+    return MAX_VEL;
   }
-  //Serial.println("SET END VX");
-  return endVx;
 }

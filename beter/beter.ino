@@ -44,6 +44,8 @@ float FINAL_OFFSET_Y;
 float TIME_OFFSET;
 float TEMP_OFFSET;
 
+float t0;
+
 uint8_t BTN_PINS[] = { BTN_0, BTN_1, BTN_2, BTN_3, INCR_BTN };
 bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
@@ -158,7 +160,7 @@ void setup() {
 
 
   //Init Gyros
-  
+
   STATE = INIT;
   displayScreen(STATE);
 
@@ -238,12 +240,25 @@ void loop() {
         if (PATH_MODE == 3) {
           testDist();
         }
-        if(PATH_MODE == 4){
+        if (PATH_MODE == 4) {
           testSquare();
         }
-       if (PATH_MODE == 1){
-        ROBOT.startPath();
-       }
+        if (PATH_MODE == 5) {
+
+          ROBOTCONTROLLER.init();
+          ROBOT.init(1);
+          STATE = RUNNING;
+          displayScreen(STATE);
+          digitalWrite(STEP_EN, LOW);
+          t0 = micros();
+          while (ROBOTCONTROLLER.theta > 0) {
+            ROBOTCONTROLLER.update();
+          }
+        }
+        Serial.println(micros() - t0);
+        if (PATH_MODE == 1) {
+          ROBOT.startPath();
+        }
         digitalWrite(LASER, LOW);
         digitalWrite(LED_0, HIGH);
         digitalWrite(LED_1, HIGH);
@@ -251,6 +266,7 @@ void loop() {
         ROBOT.update();
         displayScreen(STATE);
       }
+
       if (BTN_STATE(1)) {
         STATE = IDLE;
         digitalWrite(STEP_EN, HIGH);
@@ -417,7 +433,8 @@ void loop() {
 void ENGAGESTEPPERS(void *parameter) {
   //esp_task_wdt_init(300, false);
   STEPPERSENGAGED_MTX.lock();
-  while (STEPPERL.run() && STEPPERR.run());
+  while (STEPPERL.run() && STEPPERR.run())
+    ;
   STEPPERL.setCurrentPosition(STEPPERL.targetPosition());
   STEPPERR.setCurrentPosition(STEPPERR.targetPosition());
   STEPPERSENGAGED_MTX.unlock();
@@ -443,7 +460,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
   if (!file) {
     Serial.println("no_file!");
     return false;
-  }else {
+  } else {
     Serial.println("file");
   }
   PATH_SIZE = 0;
@@ -527,7 +544,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'J':
         pX = 2250;
         break;
-       case 'K':
+      case 'K':
         pX = 2500;
         break;
       default:
@@ -572,7 +589,7 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         Serial.println("bad_gate!");
         return false;
     }
-   
+
     if (!firstDone) {
       PATH[PATH_SIZE] = Vector2f(pX, -DIST_TO_DOWEL);
       PATH_SIZE++;
@@ -600,25 +617,21 @@ void testTurns() {
     ROBOTCONTROLLER.turnTheta(0);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
-      displayScreen(TESTING_TURNS);
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI/2);
+    ROBOTCONTROLLER.turnTheta(PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
-      displayScreen(TESTING_TURNS);
     }
     delay(500);
     ROBOTCONTROLLER.turnTheta(PI);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
-      displayScreen(TESTING_TURNS);
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI/2);
+    ROBOTCONTROLLER.turnTheta(PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
-      displayScreen(TESTING_TURNS);
     }
     delay(500);
   }
@@ -647,7 +660,7 @@ void testDist() {
   STATE = END_RUN;
 }
 
-void testSquare(){
+void testSquare() {
   delay(2000);
   Serial.println("squaring");
   displayScreen(67);
@@ -674,7 +687,7 @@ void testSquare(){
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3*PI/2);
+    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -696,7 +709,7 @@ void testSquare(){
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI/2);
+    ROBOTCONTROLLER.turnTheta(PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -718,7 +731,7 @@ void testSquare(){
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3*PI/2);
+    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -740,7 +753,7 @@ void testSquare(){
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI/2);
+    ROBOTCONTROLLER.turnTheta(PI / 2);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -992,7 +1005,6 @@ void displayScreen(int state) {
       SCREEN.println(ROBOTCONTROLLER.theta);
     case 67:
       SCREEN.print("squareing");
-      
   }
   SCREEN.display();
   //Serial.println("SCREEN REFRESH");

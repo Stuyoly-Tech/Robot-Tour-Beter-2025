@@ -37,7 +37,7 @@ void Robot::update() {
       dist = robotSimplePursuit->getCurrentGoalPointDist();
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
-        robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, robotSimplePursuit->getCurrentGoalPointDist()));
+        robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, dist));
       }
       else {
         robotController->setVx(MAX_VEL);
@@ -73,7 +73,7 @@ void Robot::update() {
       }
   
       //correct heading first;
-      if (abs(abs(deltaTheta) - PI) < 0.03) {   
+      if (abs(abs(deltaTheta) - PI) < 0.001) {   
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }
@@ -89,7 +89,7 @@ void Robot::update() {
         state = 1;
       }
       else {
-        //Serial.println("UPDATE");
+        //("UPDATE");
         robotController->update();
       }
       break;
@@ -101,7 +101,7 @@ void Robot::update() {
 
         if (robotSimplePursuit->atLastPoint()) {
           dist += DIST_TO_DOWEL; 
-          robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, robotSimplePursuit->getCurrentGoalPointDist()));
+          robotController->setVx(robotSimplePursuit->getEndVx(micros()/pow(10,6) - t_0, dist));
         }
         else {
           //vx = (2*robotController->mmToSteps(dist)*robotSimplePursuit->getAvgVx(micros() - start_us));
