@@ -32,8 +32,8 @@
 #define MAX_VEL 2000
 
 //in rad/sec
-#define MAX_ANG_ACC 5 //5
-#define MAX_ANG_VEL 10 //10
+#define MAX_ANG_ACC 3 //5
+#define MAX_ANG_VEL 6 //10
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.0001//0.0001
