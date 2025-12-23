@@ -62,6 +62,7 @@ void Robot::update() {
     case 3:
       robotSimplePursuit->nextPoint();
       theta = robotSimplePursuit->getTheta(robotController->position);
+      Serial.println(theta);
       deltaTheta = theta - robotController->thetaSetPoint;
       debugSerial->println(deltaTheta);
     
@@ -73,7 +74,7 @@ void Robot::update() {
       }
   
       //correct heading first;
-      if (abs(abs(deltaTheta) - PI) < 0.001) {   
+      if (abs(abs(deltaTheta) - PI) < 0.1) {   
         robotController->turnTheta(robotController->thetaSetPoint);
         state = 5;
       }

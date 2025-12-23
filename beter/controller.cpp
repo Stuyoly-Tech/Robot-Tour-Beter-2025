@@ -97,7 +97,7 @@ void Controller::update() {
   float deltaTheta = thetaSetPoint - theta;
   //debugSerial->println(deltaTheta);
   //debugSerial->
-  //Serial.println(theta);
+  //Serial.println(theta, 10);
 
   switch (state) {
     case 0:
@@ -121,7 +121,7 @@ void Controller::update() {
       } else if (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-      if (abs(thetaSetPoint - theta) < 0.001) {
+      if (abs(thetaSetPoint - theta) < 0.1) {
         steppersEngaged_mtx->lock();
         //stepperL->setCurrentPosition(stepperL->targetPosition());
         //stepperR->setCurrentPosition(stepperR->targetPosition());
@@ -159,11 +159,11 @@ void Controller::update() {
 
 void Controller::updateTheta() {
   dt = micros() / pow(10, 6) - t_0;
-
   if (dt > IMU_UPDATE_PERIOD) {
-    Serial.println(theta);
-    Serial.println(position(0));
-    Serial.println(position(1));
+    t_0 = micros() / pow(10, 6);
+    Serial.println(theta, 10);
+    //Serial.println(position(0));
+    //Serial.println(position(1));
 
     //Update theta
     imu->getSensorData();
@@ -172,7 +172,7 @@ void Controller::updateTheta() {
     //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
 
     float omega = (imu->data.gyroZ) * PI / 180.0;
-    float omega0 = PI / 980;  //right biased: 975 left biased: 980
+    float omega0 = PI / 772.8;  //increasing: 772.75  Decreasing: 773
     //Serial.println(imu->data.gyroZ);
 
     //debugSerial->
@@ -193,7 +193,6 @@ void Controller::updateTheta() {
       theta += TWO_PI;
     }
     updatePosition();
-    t_0 = micros() / pow(10, 6);
   }
 }
 

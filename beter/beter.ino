@@ -198,7 +198,7 @@ void setup() {
 
 void loop() {
   //ROBOT.update();
-  //ROBOTCONTROLLER.updateTheta();
+  ROBOTCONTROLLER.updateTheta();
   //Serial.println(ROBOTCONTROLLER.theta);
   vTaskDelay(1);
   switch (STATE) {
