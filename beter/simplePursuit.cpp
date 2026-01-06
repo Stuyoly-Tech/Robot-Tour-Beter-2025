@@ -47,10 +47,16 @@ float simplePursuit::getCurrentGoalPointDist(Vector2f p) {
 }
 
 float simplePursuit::getTheta(Vector2f p) {
-  //Serial.println(path[currentGoalPointIndex](1));
-  //Serial.println(p(1));
-  //Serial.println(path[currentGoalPointIndex](0));
-  //Serial.println(p(0));
+  Serial.print("TARGET(");
+  Serial.print(path[currentGoalPointIndex](0));
+  Serial.print(", ");
+  Serial.print(path[currentGoalPointIndex](1));
+  Serial.println(")");
+  Serial.print("CURRENT(");
+  Serial.print(p(0));
+  Serial.print(", ");
+  Serial.print(p(1));
+  Serial.println(")");
   return atan2(
     path[currentGoalPointIndex](1) - p(1),
     path[currentGoalPointIndex](0) - p(0)

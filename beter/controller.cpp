@@ -49,6 +49,7 @@ void Controller::init() {
   dt = 0;
   lastPosL = 0;
   lastPosR = 0;
+  lastPoint = false;
   stepperL->setCurrentPosition(0);
   stepperR->setCurrentPosition(0);
 }
@@ -76,7 +77,7 @@ void Controller::gyroInit() {
   float sum = 0;
   t_0 = micros() / pow(10, 6);
   //Begin reading
-  for (int i = 0; i < 250;) {
+  for (int i = 0; i < 1000;) {
     float t = micros() / pow(10, 6);
     if (t - t_0 > IMU_UPDATE_PERIOD) {
       imu->getSensorData();
@@ -86,7 +87,9 @@ void Controller::gyroInit() {
       i++;
     }
   }
-  gyroOffset = sum / 250;
+  gyroOffset = sum / 1000;
+
+  delay(1000);
 }
 
 
@@ -121,7 +124,7 @@ void Controller::update() {
       } else if (deltaTheta < -PI) {
         deltaTheta += TWO_PI;
       }
-      if (abs(thetaSetPoint - theta) < 0.1) {
+      if ((abs(deltaTheta) < 0.1 && !lastPoint) || abs(deltaTheta) < 0.0001) {
         steppersEngaged_mtx->lock();
         //stepperL->setCurrentPosition(stepperL->targetPosition());
         //stepperR->setCurrentPosition(stepperR->targetPosition());
@@ -161,7 +164,7 @@ void Controller::updateTheta() {
   dt = micros() / pow(10, 6) - t_0;
   if (dt > IMU_UPDATE_PERIOD) {
     t_0 = micros() / pow(10, 6);
-    Serial.println(theta, 10);
+    //Serial.println(theta, 10);
     //Serial.println(position(0));
     //Serial.println(position(1));
 
@@ -172,13 +175,13 @@ void Controller::updateTheta() {
     //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
 
     float omega = (imu->data.gyroZ) * PI / 180.0;
-    float omega0 = PI / 772.8;  //increasing: 772.75  Decreasing: 773
+    //float omega0 = PI / 772.77777775;  //increasing: 772.75  Decreasing: 772.8
     //Serial.println(imu->data.gyroZ);
 
     //debugSerial->
     //Serial.printf("OMEGA: %f\n", omega);
 
-    float dTheta = (omega + omega0) * (dt);
+    float dTheta = (omega - gyroOffset) * (dt);
 
     //Filter
     if (abs(omega) > HIGH_PASS_FREQ) {
@@ -197,6 +200,11 @@ void Controller::updateTheta() {
 }
 
 void Controller::updatePosition() {
+  Serial.print("x: ");
+  Serial.println(position(0));
+  Serial.print("y: ");
+  Serial.println(position(1));
+
   float dxL = stepperL->currentPosition() - lastPosL;
   float dxR = stepperR->currentPosition() - lastPosR;
   position(0) += steps_to_mm(dxL) * cos(theta) / 2;

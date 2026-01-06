@@ -41,6 +41,7 @@ class Controller {
     int state;
     float theta;
     float thetaSetPoint;
+    bool lastPoint;
     
 
     Controller(

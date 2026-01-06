@@ -139,6 +139,7 @@ void setup() {
 
   digitalWrite(SPREAD, LOW);
   digitalWrite(STEP_EN, HIGH);
+  digitalWrite(SPREAD, HIGH);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);s
@@ -153,7 +154,7 @@ void setup() {
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
   Wire.write(0b00001001);
-  Wire.write(0b10100000);
+  Wire.write(255);
   //Wire.write(73);
   //Wire.write(73);
   Wire.endTransmission();
@@ -212,7 +213,7 @@ void loop() {
         ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
         Serial.println(INITIAL_POSITION(0));
         Serial.println(INITIAL_POSITION(1));
-        Serial.println(sin(PI/2));
+        //Serial.println(sin(PI/2));
         ROBOTCONTROLLER.setPos(INITIAL_POSITION);
         STATE = READY;
         digitalWrite(STEP_EN, LOW);
