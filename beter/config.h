@@ -10,7 +10,7 @@
 //Screen
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_RESET -1 
+#define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
 #define SCREEN_WIRE &Wire
 
@@ -22,18 +22,24 @@
 //in mm
 #define WHEEL_RADIUS 40.6
 #define TRACK_WIDTH 146.2
-#define DIST_TO_DOWEL 91.37500
+#define DIST_TO_DOWEL 90.90431
 #define RIGHT_OFF 1
 
 //Kinematics
 
+/*ACCURATE SET OF FOUR VALUES:
+ACCELERATION: 1500
+VELOCITY: 2000
+MAX ANGULAR ACCELERATION: 15
+MAX ANGULAR VELOCITY: 15 unsure need to do a full 180 turn test
+*/
 //in mm/s
-#define MAX_ACC 1500
+#define MAX_ACC 3000
 #define MAX_VEL 3000
 
 //in rad/sec
-#define MAX_ANG_ACC 10 //5
-#define MAX_ANG_VEL 20 //10
+#define MAX_ANG_ACC 30
+#define MAX_ANG_VEL 30
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.00001//0.0001

@@ -53,6 +53,7 @@ bool BTN_PREV_STATES[] = { LOW, LOW, LOW, LOW, LOW };
 
 //SD Methods
 // ===== Function Prototypes =====
+/*
 void displayScreen(int state);
 
 bool BTN_STATE(uint8_t index);
@@ -65,9 +66,7 @@ boolean LOADPATHFROMSD(fs::FS &fs);
 void testTurns();
 void testDist();
 void testSquare();
-
-void ENGAGESTEPPERS(void *parameter);
-
+*/
 Adafruit_SSD1306 SCREEN(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIRE, OLED_RESET);
 
 AccelStepper STEPPERL(AccelStepper::DRIVER, STEP_L, DIR_L);
@@ -154,7 +153,7 @@ void setup() {
   //setting vref voltage
   Wire.beginTransmission(DAC_ADDRESS);
   Wire.write(0b00001001);
-  Wire.write(255);
+  Wire.write(200);
   //Wire.write(73);
   //Wire.write(73);
   Wire.endTransmission();
@@ -199,7 +198,7 @@ void setup() {
 
 void loop() {
   //ROBOT.update();
-  ROBOTCONTROLLER.updateTheta();
+  //ROBOTCONTROLLER.updateTheta();
   //Serial.println(ROBOTCONTROLLER.theta);
   vTaskDelay(1);
   switch (STATE) {
@@ -261,7 +260,7 @@ void loop() {
             ROBOTCONTROLLER.update();
           }
         }
-        Serial.println(micros() - t0);
+        //Serial.println(micros() - t0);
         if (PATH_MODE == 1) {
           ROBOT.startPath();
         }

@@ -20,7 +20,7 @@ void simplePursuit::init(
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
   finalOffsetY = iFinalOffsetY;
-  currentGoalPointIndex = 1;
+  currentGoalPointIndex = 0;//USED TO BE 1 BUT I THINK THIS WHY BAVF TWEAKED
 
   path[pathSize - 1] = Vector2f(path[pathSize - 1](0) + finalOffsetX, path[pathSize - 1](1) + finalOffsetY);
 
