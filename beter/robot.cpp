@@ -62,6 +62,8 @@ void Robot::update() {
       robotSimplePursuit->nextPoint();
       if (robotSimplePursuit->isTurn()) {
         deltaTheta = PI;
+        Serial.print(" deltaTheta: ");
+        Serial.println(deltaTheta);
         //debugSerial->println(deltaTheta);
 
         while (deltaTheta > PI) {
@@ -70,9 +72,10 @@ void Robot::update() {
         while (deltaTheta < -PI) {
           deltaTheta += TWO_PI;
         }
-        robotController->turnTheta(robotController->theta);
-        state = 4;
+        theta = robotSimplePursuit->getTheta(robotController->position);
+        robotController->turnTheta(robotController->theta + deltaTheta);
         robotSimplePursuit->nextPoint();
+        state = 4;
       } else {
         if (robotSimplePursuit->atLastPoint()) {
           robotController->lastPoint = true;

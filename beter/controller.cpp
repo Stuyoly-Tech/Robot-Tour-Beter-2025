@@ -200,10 +200,10 @@ void Controller::updateTheta() {
 }
 
 void Controller::updatePosition() {
-  Serial.print("x: ");
-  Serial.println(position(0));
-  Serial.print("y: ");
-  Serial.println(position(1));
+  //Serial.print("x: ");
+  //Serial.println(position(0));
+  //Serial.print("y: ");
+  //Serial.println(position(1));
 
   float dxL = stepperL->currentPosition() - lastPosL;
   float dxR = stepperR->currentPosition() - lastPosR;
