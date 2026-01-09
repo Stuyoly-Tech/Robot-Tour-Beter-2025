@@ -136,34 +136,23 @@ void setup() {
   pinMode(LASER, OUTPUT);
   pinMode(BUZZER, OUTPUT);
 
-  digitalWrite(SPREAD, LOW);
   digitalWrite(STEP_EN, HIGH);
-  digitalWrite(SPREAD, HIGH);
+  digitalWrite(SPREAD, LOW);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);s
 
   //oled init
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
-  SCREEN.clearDisplay();
-  SCREEN.setTextSize(2);
-  SCREEN.print("INIT...");
-  SCREEN.display();
+  displayScreen(STATE);
 
-  //setting vref voltage
+  delay(1000);
   Wire.beginTransmission(DAC_ADDRESS);
-  Wire.write(0b00001001);
-  Wire.write(200);
-  //Wire.write(73);
-  //Wire.write(73);
+  Wire.write(7);
+  Wire.write(69);  // required second byte
   Wire.endTransmission();
 
 
-
-  //Init Gyros
-
-  STATE = INIT;
-  displayScreen(STATE);
 
 
   attachInterrupt(digitalPinToInterrupt(INCR_A), encoderInterruptHandlerA, RISING);
@@ -206,16 +195,19 @@ void loop() {
       break;
     case IDLE:
       if (BTN_STATE(1)) {
-        STATE = INIT;
-        displayScreen(STATE);
+
+        digitalWrite(STEP_EN, LOW);
+        ROBOTCONTROLLER.init();
         ROBOT.init(PATH_MODE);
         ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
+        STEPPERL.setSpeed(0);
+        STEPPERR.setSpeed(0);
+        STEPPERL.runSpeed();
+        STEPPERR.runSpeed();
         Serial.println(INITIAL_POSITION(0));
         Serial.println(INITIAL_POSITION(1));
-        //Serial.println(sin(PI/2));
         ROBOTCONTROLLER.setPos(INITIAL_POSITION);
         STATE = READY;
-        digitalWrite(STEP_EN, LOW);
         digitalWrite(LED_0, HIGH);
         displayScreen(STATE);
       }
@@ -249,12 +241,10 @@ void loop() {
           testSquare();
         }
         if (PATH_MODE == 5) {
-
           ROBOTCONTROLLER.init();
           ROBOT.init(1);
           STATE = RUNNING;
           displayScreen(STATE);
-          digitalWrite(STEP_EN, LOW);
           t0 = micros();
           while (ROBOTCONTROLLER.theta > 0) {
             ROBOTCONTROLLER.update();
@@ -519,6 +509,9 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     //coords
     float pX, pY;
     switch (buff[0]) {
+      case 'T':
+        pX = 6767;
+        break;
       case 'A':
         pX = 0;
         break;
@@ -557,6 +550,9 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         return false;
     }
     switch (buff[1]) {
+      case 'T':
+        pY = 6767;
+        break;
       case '1':
         pY = 0;
         break;

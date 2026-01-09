@@ -20,7 +20,7 @@ void simplePursuit::init(
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
   finalOffsetY = iFinalOffsetY;
-  currentGoalPointIndex = 0;//USED TO BE 1 BUT I THINK THIS WHY BAVF TWEAKED
+  currentGoalPointIndex = 1;//USED TO BE 1 BUT I THINK THIS WHY BAVF TWEAKED
 
   path[pathSize - 1] = Vector2f(path[pathSize - 1](0) + finalOffsetX, path[pathSize - 1](1) + finalOffsetY);
 
@@ -40,6 +40,10 @@ void simplePursuit::nextPoint() {
 
 boolean simplePursuit::atLastPoint() {
   return (currentGoalPointIndex == pathSize - 1);
+}
+
+boolean simplePursuit::isTurn(){
+  return path[currentGoalPointIndex](0) == 6767;
 }
 
 float simplePursuit::getCurrentGoalPointDist(Vector2f p) {

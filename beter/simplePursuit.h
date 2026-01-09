@@ -39,6 +39,8 @@ class simplePursuit {
       float iFinalOffsetY, float iFinalOffsetX
     );
 
+    bool isTurn();
+
     //get index of path
     int getPathIndexCount();
 

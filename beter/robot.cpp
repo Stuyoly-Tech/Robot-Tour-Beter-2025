@@ -60,31 +60,46 @@ void Robot::update() {
     //deciding turns
     case 3:
       robotSimplePursuit->nextPoint();
-      if (robotSimplePursuit->atLastPoint()) {
-        robotController->lastPoint = true;
-      }
-      theta = robotSimplePursuit->getTheta(robotController->position);
-      Serial.print("next target theta: ");
-      Serial.println(theta);
-      deltaTheta = theta - robotController->theta;
-      //debugSerial->println(deltaTheta);
+      if (robotSimplePursuit->isTurn()) {
+        deltaTheta = PI;
+        //debugSerial->println(deltaTheta);
 
-      while (deltaTheta > PI) {
-        deltaTheta -= TWO_PI;
-      }
-      while (deltaTheta < -PI) {
-        deltaTheta += TWO_PI;
-      }
-
-      //correct heading first;
-      if (abs(abs(deltaTheta) - PI) < 0.1) {
-        robotController->turnTheta(theta - PI);
-        state = 5;
-      }
-
-      else {
-        robotController->turnTheta(theta);
+        while (deltaTheta > PI) {
+          deltaTheta -= TWO_PI;
+        }
+        while (deltaTheta < -PI) {
+          deltaTheta += TWO_PI;
+        }
+        robotController->turnTheta(robotController->theta);
         state = 4;
+        robotSimplePursuit->nextPoint();
+      } else {
+        if (robotSimplePursuit->atLastPoint()) {
+          robotController->lastPoint = true;
+        }
+        theta = robotSimplePursuit->getTheta(robotController->position);
+        Serial.print("next target theta: ");
+        Serial.println(theta);
+        deltaTheta = theta - robotController->theta;
+        //debugSerial->println(deltaTheta);
+
+        while (deltaTheta > PI) {
+          deltaTheta -= TWO_PI;
+        }
+        while (deltaTheta < -PI) {
+          deltaTheta += TWO_PI;
+        }
+
+        //correct heading first;
+        if (abs(abs(deltaTheta) - PI) < 0.1) {
+          robotController->turnTheta(theta - PI);
+          state = 5;
+        }
+
+        else {
+          robotController->turnTheta(theta);
+          state = 4;
+        }
       }
       break;
 
