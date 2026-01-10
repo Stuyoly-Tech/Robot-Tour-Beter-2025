@@ -146,7 +146,6 @@ void setup() {
   SCREEN.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
   displayScreen(STATE);
 
-  delay(1000);
   Wire.beginTransmission(DAC_ADDRESS);
   Wire.write(7);
   Wire.write(69);  // required second byte
@@ -197,13 +196,13 @@ void loop() {
       if (BTN_STATE(1)) {
 
         digitalWrite(STEP_EN, LOW);
+        STEPPERL.setSpeed(1);
+        STEPPERR.setSpeed(1);
+        STEPPERL.runSpeed();
+        STEPPERR.runSpeed();
         ROBOTCONTROLLER.init();
         ROBOT.init(PATH_MODE);
         ROBOTSIMPLEPURSUIT.init(PATH, PATH_SIZE, TARGET_TIME + TIME_OFFSET, FINAL_OFFSET_Y, FINAL_OFFSET_X);
-        STEPPERL.setSpeed(0);
-        STEPPERR.setSpeed(0);
-        STEPPERL.runSpeed();
-        STEPPERR.runSpeed();
         Serial.println(INITIAL_POSITION(0));
         Serial.println(INITIAL_POSITION(1));
         ROBOTCONTROLLER.setPos(INITIAL_POSITION);
