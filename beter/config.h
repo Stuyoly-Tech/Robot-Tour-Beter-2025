@@ -39,7 +39,7 @@ MAX ANGULAR VELOCITY: 15 unsure need to do a full 180 turn test
 
 //in rad/sec
 #define MAX_ANG_ACC 10
-#define MAX_ANG_VEL 5
+#define MAX_ANG_VEL 10
 
 //Filter for angular velocity drift
 #define HIGH_PASS_FREQ 0.00001//0.0001
