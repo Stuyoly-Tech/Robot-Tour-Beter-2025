@@ -187,7 +187,7 @@ void setup() {
 void loop() {
   //ROBOT.update();
   //ROBOTCONTROLLER.updateTheta();
-  //Serial.println(ROBOTCONTROLLER.theta);
+  //Serial.println(ROBOTCONTROLLER.theta, 10);
   vTaskDelay(1);
   switch (STATE) {
     case INIT:
@@ -511,6 +511,9 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'T':
         pX = 6767;
         break;
+      case 'X':
+        pX = 7676;
+        break;
       case 'A':
         pX = 0;
         break;
@@ -551,6 +554,12 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
     switch (buff[1]) {
       case 'T':
         pY = 6767;
+        break;
+      case 'R':
+        pY = 676767;
+        break;
+      case 'L':
+        pY = 67676767;
         break;
       case '1':
         pY = 0;
@@ -615,22 +624,22 @@ void testTurns() {
   displayScreen(STATE);
   digitalWrite(STEP_EN, LOW);
   for (int i = 0; i < 50; i++) {
-    ROBOTCONTROLLER.turnTheta(0);
+    ROBOTCONTROLLER.turnTheta(0, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI);
+    ROBOTCONTROLLER.turnTheta(PI, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
     delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
     }
@@ -677,7 +686,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI);
+    ROBOTCONTROLLER.turnTheta(PI, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -688,7 +697,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
+    ROBOTCONTROLLER.turnTheta(3 * PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -699,7 +708,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(0);
+    ROBOTCONTROLLER.turnTheta(0, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -710,7 +719,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -721,7 +730,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(0);
+    ROBOTCONTROLLER.turnTheta(0, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -732,7 +741,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(3 * PI / 2);
+    ROBOTCONTROLLER.turnTheta(3 * PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -743,7 +752,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI);
+    ROBOTCONTROLLER.turnTheta(PI, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);
@@ -754,7 +763,7 @@ void testSquare() {
       ROBOTCONTROLLER.update();
     }
 
-    ROBOTCONTROLLER.turnTheta(PI / 2);
+    ROBOTCONTROLLER.turnTheta(PI / 2, false);
     while (ROBOTCONTROLLER.state != 0) {
       ROBOTCONTROLLER.update();
       displayScreen(TESTING_TURNS);

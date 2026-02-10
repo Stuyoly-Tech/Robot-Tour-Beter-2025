@@ -59,10 +59,11 @@ class Controller {
 
     void update();
     void updateTheta();
-    void updatePosition();
+    void updatePosition(float dTheta);
 
     void moveX(float dist);
-    void turnTheta(float targetTheta);
+    void turnTheta(float targetTheta, bool SLOW);
+    void doArc(int arcType);
 
     void setVx(float newVx);
 

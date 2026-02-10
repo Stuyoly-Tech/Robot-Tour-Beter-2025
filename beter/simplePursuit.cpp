@@ -20,7 +20,7 @@ void simplePursuit::init(
   targetTime = iTargetTime;
   finalOffsetX = iFinalOffsetX;
   finalOffsetY = iFinalOffsetY;
-  currentGoalPointIndex = 1;//USED TO BE 1 BUT I THINK THIS WHY BAVF TWEAKED
+  currentGoalPointIndex = 1;  //USED TO BE 1 BUT I THINK THIS WHY BAVF TWEAKED
 
   path[pathSize - 1] = Vector2f(path[pathSize - 1](0) + finalOffsetX, path[pathSize - 1](1) + finalOffsetY);
 
@@ -42,9 +42,37 @@ boolean simplePursuit::atLastPoint() {
   return (currentGoalPointIndex == pathSize - 1);
 }
 
-boolean simplePursuit::isTurn(){
-  return path[currentGoalPointIndex](0) == 6767;
+int simplePursuit::turnType() {
+  int output = 0;
+  if(path[currentGoalPointIndex](0) != 6767){
+    return output;
+  }
+  if(path[currentGoalPointIndex](1) == 6767){
+    output = 1;
+  }
+  if (path[currentGoalPointIndex](1) == 676767) {
+    output = 2;
+  }
+  if (path[currentGoalPointIndex](1) == 67676767) {
+    output = 3;
+  }
+  return output;
 }
+
+int simplePursuit::arcType() {
+  int output = 0;
+  if(path[currentGoalPointIndex](0) != 7676){
+    return output;
+  }
+  if (path[currentGoalPointIndex](1) == 676767) {
+    output = 1;
+  }
+  if (path[currentGoalPointIndex](1) == 67676767) {
+    output = 2;
+  }
+  return output;
+}
+
 
 float simplePursuit::getCurrentGoalPointDist(Vector2f p) {
   return getDist(path[currentGoalPointIndex], p);
@@ -63,8 +91,7 @@ float simplePursuit::getTheta(Vector2f p) {
   Serial.println(")");
   return atan2(
     path[currentGoalPointIndex](1) - p(1),
-    path[currentGoalPointIndex](0) - p(0)
-  );
+    path[currentGoalPointIndex](0) - p(0));
 }
 
 float simplePursuit::getEndVx(float t, float d) {

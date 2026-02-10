@@ -29,6 +29,8 @@ class Robot {
     int pathMode;
 
     float sgn(float n);
+
+    bool LASTBACK;
     
   public:
     Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC* pDebugSerial);

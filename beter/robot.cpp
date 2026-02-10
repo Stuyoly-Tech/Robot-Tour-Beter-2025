@@ -12,6 +12,7 @@ Robot::Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC *pDeb
 
 void Robot::init() {
   robotController->init(PI / 2);
+  LASTBACK = false;
   pathMode = 0;
   state = 0;
 }
@@ -35,6 +36,9 @@ void Robot::update() {
     //deciding forward movement
     case 1:
       dist = robotSimplePursuit->getCurrentGoalPointDist(robotController->position);
+      if (LASTBACK) {
+        dist = -dist;
+      }
       if (robotSimplePursuit->atLastPoint()) {
         dist -= DIST_TO_DOWEL;
         robotController->setVx(robotSimplePursuit->getEndVx(micros() / pow(10, 6) - t_0, dist));
@@ -60,7 +64,7 @@ void Robot::update() {
     //deciding turns
     case 3:
       robotSimplePursuit->nextPoint();
-      if (robotSimplePursuit->isTurn()) {
+      if (robotSimplePursuit->turnType() == 1) {
         deltaTheta = PI;
         Serial.print(" deltaTheta: ");
         Serial.println(deltaTheta);
@@ -73,9 +77,50 @@ void Robot::update() {
           deltaTheta += TWO_PI;
         }
         theta = robotSimplePursuit->getTheta(robotController->position);
-        robotController->turnTheta(robotController->theta + deltaTheta);
-        robotSimplePursuit->nextPoint();
-        state = 4;
+        robotController->turnTheta(robotController->theta + deltaTheta, true);
+
+        //robotSimplePursuit->nextPoint();
+        state = 2;
+      } else if (robotSimplePursuit->turnType() == 2) {
+        deltaTheta = -PI / 2;
+        Serial.print(" deltaTheta: ");
+        Serial.println(deltaTheta);
+        //debugSerial->println(deltaTheta);
+
+        while (deltaTheta > PI) {
+          deltaTheta -= TWO_PI;
+        }
+        while (deltaTheta < -PI) {
+          deltaTheta += TWO_PI;
+        }
+        theta = robotSimplePursuit->getTheta(robotController->position);
+        robotController->turnTheta(robotController->theta + deltaTheta, false);
+
+        //robotSimplePursuit->nextPoint();
+        state = 2;
+      } else if (robotSimplePursuit->turnType() == 3) {
+        deltaTheta = PI / 2;
+        Serial.print(" deltaTheta: ");
+        Serial.println(deltaTheta);
+        //debugSerial->println(deltaTheta);
+
+        while (deltaTheta > PI) {
+          deltaTheta -= TWO_PI;
+        }
+        while (deltaTheta < -PI) {
+          deltaTheta += TWO_PI;
+        }
+        theta = robotSimplePursuit->getTheta(robotController->position);
+        robotController->turnTheta(robotController->theta + deltaTheta, false);
+
+        //robotSimplePursuit->nextPoint();
+        state = 2;
+      } else if (robotSimplePursuit->arcType() != 0) {
+
+        robotController->doArc(robotSimplePursuit->arcType());
+        //robotSimplePursuit->nextPoint();
+
+        state = 2;
       } else {
         if (robotSimplePursuit->atLastPoint()) {
           robotController->lastPoint = true;
@@ -93,14 +138,22 @@ void Robot::update() {
           deltaTheta += TWO_PI;
         }
 
-        //correct heading first;
-        if (abs(abs(deltaTheta) - PI) < 0.1) {
-          robotController->turnTheta(theta - PI);
-          state = 5;
+        if (abs(abs(deltaTheta) - PI) < 0.5 && !robotSimplePursuit->atLastPoint()) {
+          robotController->turnTheta(theta - PI, false);
+          state = 6;
+        } else if (abs(abs(deltaTheta) - PI) < 0.5 && robotSimplePursuit->atLastPoint()) {
+          LASTBACK = true;
+          robotController->turnTheta(theta - PI, true);
+          state = 6;
         }
 
         else {
-          robotController->turnTheta(theta);
+          //Serial.println(deltaTheta);
+          if (abs(deltaTheta) > ((5 * PI) / 8)) {
+            robotController->turnTheta(theta, true);
+          } else {
+            robotController->turnTheta(theta, false);
+          }
           state = 4;
         }
       }
@@ -133,7 +186,14 @@ void Robot::update() {
 
       //robotController->update();
       break;
-
+    case 6:
+      if (robotController->state == 0) {
+        state = 5;
+      } else {
+        //("UPDATE");
+        robotController->update();
+      }
+      break;
     default:
       state = 0;
       break;

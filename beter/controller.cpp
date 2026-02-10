@@ -110,7 +110,7 @@ void Controller::update() {
       stepperL->run();
 
       stepperR->run();
-      
+
       if (steppersEngaged_mtx->try_lock()) {
         state = 0;
         steppersEngaged_mtx->unlock();
@@ -183,10 +183,7 @@ void Controller::updateTheta() {
 
     float dTheta = (omega - gyroOffset) * (dt);
 
-    //Filter
-    if (abs(omega) > HIGH_PASS_FREQ) {
-      theta += dTheta;
-    }
+    theta += dTheta;
 
     //Rescale theta
     while (theta > PI) {
@@ -195,11 +192,11 @@ void Controller::updateTheta() {
     while (theta < -PI) {
       theta += TWO_PI;
     }
-    updatePosition();
+    updatePosition(dTheta);
   }
 }
 
-void Controller::updatePosition() {
+void Controller::updatePosition(float dTheta) {
   //Serial.print("x: ");
   //Serial.println(position(0));
   //Serial.print("y: ");
@@ -207,10 +204,11 @@ void Controller::updatePosition() {
 
   float dxL = stepperL->currentPosition() - lastPosL;
   float dxR = stepperR->currentPosition() - lastPosR;
-  position(0) += steps_to_mm(dxL) * cos(theta) / 2;
-  position(0) += steps_to_mm(dxR) * cos(theta) / 2;
-  position(1) += steps_to_mm(dxL) * sin(theta) / 2;
-  position(1) += steps_to_mm(dxR) * sin(theta) / 2;
+  float thetaMid = theta - dTheta / 2;
+  position(0) += steps_to_mm(dxL) * cos(thetaMid) / 2;
+  position(0) += steps_to_mm(dxR) * cos(thetaMid) / 2;
+  position(1) += steps_to_mm(dxL) * sin(thetaMid) / 2;
+  position(1) += steps_to_mm(dxR) * sin(thetaMid) / 2;
   lastPosL = stepperL->currentPosition();
   lastPosR = stepperR->currentPosition();
 }
@@ -248,9 +246,13 @@ void Controller::moveX(float dist) {
 }
 
 
-void Controller::turnTheta(float targetTheta) {
+void Controller::turnTheta(float targetTheta, bool SLOW) {
   int maxOmega = mm_to_steps(MAX_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
   int maxAlpha = mm_to_steps(MAX_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  if (SLOW) {
+    maxOmega = mm_to_steps(SLOW_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+    maxAlpha = mm_to_steps(SLOW_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  }
 
   //lock steppers
   steppersEngaged_mtx->lock();
@@ -282,6 +284,39 @@ void Controller::turnTheta(float targetTheta) {
 
   //Change state
   state = 2;
+}
+
+void Controller::doArc(int arcType) {
+  float outerR = 250 + TRACK_WIDTH / 2;
+  float innerR = 250 - TRACK_WIDTH / 2;
+  float ratio = innerR / outerR;
+  steppersEngaged_mtx->lock();
+  if (arcType == 1) {
+    stepperL->setAcceleration(mm_to_steps(MAX_ACC_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperR->setAcceleration(mm_to_steps(MAX_ACC_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperL->setMaxSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperR->setMaxSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperL->setSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperR->setSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperR->move(mm_to_steps(innerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperL->move(mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
+  }
+  if (arcType == 2) {
+    stepperR->setAcceleration(mm_to_steps(MAX_ACC_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperL->setAcceleration(mm_to_steps(MAX_ACC_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperR->setMaxSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperL->setMaxSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperR->setSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperL->setSpeed(mm_to_steps(MAX_VEL_ARC, WHEEL_RADIUS, STEPS_PER_REV) * ratio);
+    stepperL->move(mm_to_steps(innerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
+    stepperR->move(mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
+  }
+
+  steppersEngaged_mtx->unlock();
+
+  xTaskCreatePinnedToCore(engageSteppers, "engageSteppers Task", 10000, NULL, 1, engageSteppersHandle, 1);
+
+  state = 1;
 }
 
 void Controller::setVx(float newVx) {
