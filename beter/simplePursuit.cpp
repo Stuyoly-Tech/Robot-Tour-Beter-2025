@@ -44,10 +44,10 @@ boolean simplePursuit::atLastPoint() {
 
 int simplePursuit::turnType() {
   int output = 0;
-  if(path[currentGoalPointIndex](0) != 6767){
+  if (path[currentGoalPointIndex](0) != 6767) {
     return output;
   }
-  if(path[currentGoalPointIndex](1) == 6767){
+  if (path[currentGoalPointIndex](1) == 6767) {
     output = 1;
   }
   if (path[currentGoalPointIndex](1) == 676767) {
@@ -61,7 +61,7 @@ int simplePursuit::turnType() {
 
 int simplePursuit::arcType() {
   int output = 0;
-  if(path[currentGoalPointIndex](0) != 7676){
+  if (path[currentGoalPointIndex](0) != 7676) {
     return output;
   }
   if (path[currentGoalPointIndex](1) == 676767) {

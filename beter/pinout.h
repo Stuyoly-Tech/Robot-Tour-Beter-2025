@@ -2,10 +2,10 @@
 #define PINOUT_H
 
 //Buttons for input(0 and 1 are swapped from pcb labeling)
-#define BTN_0 2 //INIT | x
-#define BTN_1 1 //RUN | TIME ADJUST
-#define BTN_2 3 //ADJUSTMENTS | X ADJUST
-#define BTN_3 4 //LASERS | Y ADJUST
+#define BTN_0 2  //INIT | x
+#define BTN_1 1  //RUN | TIME ADJUST
+#define BTN_2 3  //ADJUSTMENTS | X ADJUST
+#define BTN_3 4  //LASERS | Y ADJUST
 
 //Rotary Encoder
 #define INCR_BTN 5
@@ -29,7 +29,7 @@
 #define INDEX_R 12
 
 #define STEP_EN 9
-#define SPREAD 45   
+#define SPREAD 45
 
 //Laser
 #define LASER 42

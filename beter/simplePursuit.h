@@ -9,56 +9,55 @@ using namespace Eigen;
 //Gets points and tells distances/required headings
 
 class simplePursuit {
-  private:
-    Vector2f *path;
+private:
+  Vector2f *path;
 
-    int pathSize;
-    int currentGoalPointIndex;
+  int pathSize;
+  int currentGoalPointIndex;
 
-    float centerToDowel; 
-    float targetTime;
+  float centerToDowel;
+  float targetTime;
 
-    float finalOffsetX;
-    float finalOffsetY;
+  float finalOffsetX;
+  float finalOffsetY;
 
-    float endVx;
+  float endVx;
 
-    //Time alloted for each turn, used to calculate avgVx
+  //Time alloted for each turn, used to calculate avgVx
 
-    float limitVx;
-    float limitOmega;
-    
-    float getDist(Vector2f p1, Vector2f p2);
-    
-  public:
-    //simplePursuit();
-    
-    void init(
-      Vector2f *iPath, int iPathSize, 
-      float iTargetTime, 
-      float iFinalOffsetY, float iFinalOffsetX
-    );
+  float limitVx;
+  float limitOmega;
 
-    int turnType();
-    int arcType();
+  float getDist(Vector2f p1, Vector2f p2);
 
-    //get index of path
-    int getPathIndexCount();
+public:
+  //simplePursuit();
 
-    //True if not the end of the path, false if it is
-    void nextPoint();
+  void init(
+    Vector2f *iPath, int iPathSize,
+    float iTargetTime,
+    float iFinalOffsetY, float iFinalOffsetX);
 
-    //Stuff
-    boolean atLastPoint();
+  int turnType();
+  int arcType();
 
-    //Distance needed to be traveled from point a to b
-    float getCurrentGoalPointDist(Vector2f p);
+  //get index of path
+  int getPathIndexCount();
 
-    //Requried heading to go from point a to b
-    float getTheta(Vector2f p);
+  //True if not the end of the path, false if it is
+  void nextPoint();
 
-    //Average speed needed to complete track on time
-    float getEndVx(float t, float d);
+  //Stuff
+  boolean atLastPoint();
+
+  //Distance needed to be traveled from point a to b
+  float getCurrentGoalPointDist(Vector2f p);
+
+  //Requried heading to go from point a to b
+  float getTheta(Vector2f p);
+
+  //Average speed needed to complete track on time
+  float getEndVx(float t, float d);
 };
 
 #endif

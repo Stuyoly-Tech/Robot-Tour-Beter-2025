@@ -59,6 +59,7 @@ void Robot::update() {
         }
       }
       robotController->update();
+      robotController->updatePosition(0, 0);
       break;
 
     //deciding turns
@@ -80,7 +81,7 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, true);
 
         //robotSimplePursuit->nextPoint();
-        state = 2;
+        state = 7;
       } else if (robotSimplePursuit->turnType() == 2) {
         deltaTheta = -PI / 2;
         Serial.print(" deltaTheta: ");
@@ -97,7 +98,7 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, false);
 
         //robotSimplePursuit->nextPoint();
-        state = 2;
+        state = 7;
       } else if (robotSimplePursuit->turnType() == 3) {
         deltaTheta = PI / 2;
         Serial.print(" deltaTheta: ");
@@ -114,13 +115,13 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, false);
 
         //robotSimplePursuit->nextPoint();
-        state = 2;
+        state = 7;
       } else if (robotSimplePursuit->arcType() != 0) {
 
         robotController->doArc(robotSimplePursuit->arcType());
         //robotSimplePursuit->nextPoint();
 
-        state = 2;
+        state = 7;
       } else {
         if (robotSimplePursuit->atLastPoint()) {
           robotController->lastPoint = true;
@@ -165,6 +166,7 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
+        robotController->updatePosition(0, 0);
       }
       break;
 
@@ -192,7 +194,18 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
+        robotController->updatePosition(0, 0);
       }
+      break;
+    case 7:
+      if (robotController->state == 0) {
+        if (robotSimplePursuit->atLastPoint()) {
+          state = 0;
+        } else {
+          state = 3;
+        }
+      }
+      robotController->update();
       break;
     default:
       state = 0;
@@ -202,6 +215,8 @@ void Robot::update() {
 
 void Robot::startPath() {
   t_0 = micros() / pow(10, 6);
+  robotController->vel_x = 0;
+  robotController->vel_y = 0;
   state = 1;
 }
 

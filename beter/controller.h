@@ -13,61 +13,67 @@ using namespace Eigen;
 #include "config.h"
 
 class Controller {
-  private:
-    HWCDC* debugSerial;
+private:
+  HWCDC *debugSerial;
 
-    //IMU
-    BMI270 *imu;
+  //IMU
+  BMI270 *imu;
 
-    //Motors
-    AccelStepper *stepperL;
-    AccelStepper *stepperR;
+  //Motors
+  AccelStepper *stepperL;
+  AccelStepper *stepperR;
 
-    std::mutex *steppersEngaged_mtx;
-    void (*engageSteppers)(void * parameter);
-    TaskHandle_t *engageSteppersHandle;
+  std::mutex *steppersEngaged_mtx;
+  void (*engageSteppers)(void *parameter);
+  TaskHandle_t *engageSteppersHandle;
 
-    float vx;
-    float gyroOffset;
-    
+  float vx;
+  float gyroOffset;
+  float ACC_X_OFFSET;
+  float ACC_Y_OFFSET;
 
-    //Control variables (mostly for P controller on theta)
-    float t_0;
-    float dt;
-    float lastPosL;
-    float lastPosR;
-  public:
-    Vector2f position;
-    int state;
-    float theta;
-    float thetaSetPoint;
-    bool lastPoint;
-    
 
-    Controller(
-      AccelStepper* pStepperL, AccelStepper* pStepperR,
-      std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void * parameter),
-      TaskHandle_t *iEngageSteppersHandle, 
-      BMI270* pImu,
-      HWCDC* pDebugSerial
-    );
+  //Control variables (mostly for P controller on theta)
+  float t_0;
+  float dt;
+  float lastAccX;
+  float lastAccY;
+  float lastPosR;
+  float lastPosL;
+public:
+  Vector2f position;
+  Vector2f imu_position;
+  int state;
+  float theta;
+  float thetaSetPoint;
+  bool lastPoint;
+  float vel_x;
+  float vel_y;
 
-    void init(float iTheta);
-    void init();
-    void gyroInit();
-    float getGyroZ();
 
-    void update();
-    void updateTheta();
-    void updatePosition(float dTheta);
+  Controller(
+    AccelStepper *pStepperL, AccelStepper *pStepperR,
+    std::mutex *iSteppersEngaged_mtx, void (*iEngageSteppers)(void *parameter),
+    TaskHandle_t *iEngageSteppersHandle,
+    BMI270 *pImu,
+    HWCDC *pDebugSerial);
 
-    void moveX(float dist);
-    void turnTheta(float targetTheta, bool SLOW);
-    void doArc(int arcType);
+  void init(float iTheta);
+  void init();
+  void gyroInit();
+  float getGyroZ();
 
-    void setVx(float newVx);
+  void update();
+  void updateTheta();
+  void updatePosition(float dTheta, float omega);
 
-    void setPos(Vector2f p);
+  void moveX(float dist);
+  void turnTheta(float targetTheta, bool SLOW);
+  void doArc(int arcType);
+
+  void setVx(float newVx);
+
+  void setPos(Vector2f p);
 };
 
 #endif

@@ -9,40 +9,39 @@
 #include "config.h"
 
 class Robot {
-  private:
-    simplePursuit *robotSimplePursuit;
-    Controller *robotController; //robot controller
+private:
+  simplePursuit *robotSimplePursuit;
+  Controller *robotController;  //robot controller
 
-    HWCDC* debugSerial;
-    
-    //0 for idle
-    //1 for deciding forward
-    //2 for moving
-    //3 for deciding turn
-    //4 for turning
-    int state;
+  HWCDC *debugSerial;
 
-    float t_0;
+  //0 for idle
+  //1 for deciding forward
+  //2 for moving
+  //3 for deciding turn
+  //4 for turning
+  int state;
 
-    //getting distance from end point
-    float centerToDowel;
-    int pathMode;
+  float t_0;
 
-    float sgn(float n);
+  //getting distance from end point
+  float centerToDowel;
+  int pathMode;
 
-    bool LASTBACK;
-    
-  public:
-    Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC* pDebugSerial);
-      
-    void init();
-    void init(int iPathMode);
-    void update();
-    void updatePos();
-    void startPath();
-    float stopPath();
-    int getState();
+  float sgn(float n);
 
+  bool LASTBACK;
+
+public:
+  Robot(simplePursuit *iSimplePursuit, Controller *iController, HWCDC *pDebugSerial);
+
+  void init();
+  void init(int iPathMode);
+  void update();
+  void updatePos();
+  void startPath();
+  float stopPath();
+  int getState();
 };
 
 

@@ -187,7 +187,10 @@ void setup() {
 void loop() {
   //ROBOT.update();
   //ROBOTCONTROLLER.updateTheta();
-  //Serial.println(ROBOTCONTROLLER.theta, 10);
+  //Serial.print("X: ");
+  //Serial.println(ROBOTCONTROLLER.imu_position(0), 10);
+  //Serial.print("Y: ");
+  //Serial.println(ROBOTCONTROLLER.imu_position(1), 10);
   vTaskDelay(1);
   switch (STATE) {
     case INIT:
