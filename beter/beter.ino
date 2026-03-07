@@ -255,13 +255,14 @@ void loop() {
         //Serial.println(micros() - t0);
         if (PATH_MODE == 1) {
           ROBOT.startPath();
+
+          digitalWrite(LASER, LOW);
+          digitalWrite(LED_0, HIGH);
+          digitalWrite(LED_1, HIGH);
+          STATE = RUNNING;
+          ROBOT.update();
+          displayScreen(STATE);
         }
-        digitalWrite(LASER, LOW);
-        digitalWrite(LED_0, HIGH);
-        digitalWrite(LED_1, HIGH);
-        STATE = RUNNING;
-        ROBOT.update();
-        displayScreen(STATE);
       }
 
       if (BTN_STATE(1)) {
@@ -620,35 +621,25 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
 }
 
 void testTurns() {
-  delay(2000);
   ROBOTCONTROLLER.init();
   ROBOT.init(1);
-  STATE = RUNNING;
-  displayScreen(STATE);
   digitalWrite(STEP_EN, LOW);
-  for (int i = 0; i < 50; i++) {
-    ROBOTCONTROLLER.turnTheta(0, false);
-    while (ROBOTCONTROLLER.state != 0) {
-      ROBOTCONTROLLER.update();
-    }
-    delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2, false);
-    while (ROBOTCONTROLLER.state != 0) {
-      ROBOTCONTROLLER.update();
-    }
-    delay(500);
-    ROBOTCONTROLLER.turnTheta(PI, false);
-    while (ROBOTCONTROLLER.state != 0) {
-      ROBOTCONTROLLER.update();
-    }
-    delay(500);
-    ROBOTCONTROLLER.turnTheta(PI / 2, false);
-    while (ROBOTCONTROLLER.state != 0) {
-      ROBOTCONTROLLER.update();
-    }
-    delay(500);
+  ROBOTCONTROLLER.turnTheta((-PI/2), true);
+  while (ROBOTCONTROLLER.state != 0) {
+    ROBOTCONTROLLER.update();
   }
-  STATE = END_RUN;
+  SCREEN.clearDisplay();
+  SCREEN.setTextColor(SSD1306_WHITE);
+  SCREEN.setTextSize(1);
+  SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 0);
+  SCREEN.print("LEFT POS: ");
+  SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 1 * 8);
+  SCREEN.print(STEPPERL.currentPosition());
+  SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 2 * 8);
+  SCREEN.print("RIGHT POS: ");
+  SCREEN.setCursor((1.5 * SCREEN_WIDTH) / 8 - 2, 3 * 8);
+  SCREEN.print(STEPPERR.currentPosition());
+  SCREEN.display();
 }
 
 void testDist() {

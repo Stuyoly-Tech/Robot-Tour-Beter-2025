@@ -53,6 +53,7 @@ void Controller::init() {
   lastPosR = 0;
   vel_x = 0;
   vel_y = 0;
+  thetaMid = 0;
   lastPoint = false;
   stepperL->setCurrentPosition(0);
   stepperR->setCurrentPosition(0);
@@ -105,6 +106,7 @@ void Controller::gyroInit() {
 
   imu_position(0) = position(0) + IMU_X;
   imu_position(1) = position(1) + IMU_Y;
+  omega = 0;
 
   delay(1000);
 }
@@ -112,7 +114,6 @@ void Controller::gyroInit() {
 
 void Controller::update() {
   //Serial.println(dt);
-  updateTheta();
 
   float deltaTheta = thetaSetPoint - theta;
   //debugSerial->println(deltaTheta);
@@ -128,6 +129,8 @@ void Controller::update() {
       stepperR->run();
 
       if (steppersEngaged_mtx->try_lock()) {
+        Serial.println(position(0));
+        Serial.println(position(1));
         state = 0;
         steppersEngaged_mtx->unlock();
         //vel_x = 0;
@@ -153,10 +156,10 @@ void Controller::update() {
         steppersEngaged_mtx->lock();
         //stepperL->setCurrentPosition(stepperL->targetPosition());
         //stepperR->setCurrentPosition(stepperR->targetPosition());
-        lastPosL = 0;
-        lastPosR = 0;
-        stepperL->setCurrentPosition(0);
-        stepperR->setCurrentPosition(0);
+        //lastPosL = 0;
+        //lastPosR = 0;
+        //stepperL->setCurrentPosition(0);
+        //stepperR->setCurrentPosition(0);
         stepperL->move(-steps);
         stepperR->move(steps);
         steppersEngaged_mtx->unlock();
@@ -180,9 +183,11 @@ void Controller::update() {
       state = 0;
       break;
   }
+  updateTheta();
 }
 
 void Controller::updateTheta() {
+  Serial.println(theta);
   dt = micros() / pow(10, 6) - t_0;
   //updatePosition(0, 0);
   if (dt > IMU_UPDATE_PERIOD) {
@@ -197,7 +202,7 @@ void Controller::updateTheta() {
     //debugSerial->
     //Serial.printf("bihh IMU: %f\n", imu->data.gyroZ);
 
-    float omega = (imu->data.gyroZ) * PI / 180.0 - gyroOffset;
+    omega = (imu->data.gyroZ) * PI / 180.0 - gyroOffset;
     //float omega0 = PI / 772.77777775;  //increasing: 772.75  Decreasing: 772.8
     //Serial.println(imu->data.gyroZ);
 
@@ -205,7 +210,7 @@ void Controller::updateTheta() {
     //Serial.printf("OMEGA: %f\n", omega);
 
     float dTheta = omega * (dt);
-
+    thetaMid = theta + dTheta / 2;
     theta += dTheta;
 
     //Rescale theta
@@ -215,25 +220,25 @@ void Controller::updateTheta() {
     while (theta < -PI) {
       theta += TWO_PI;
     }
-    //updatePosition(theta, omega);
   }
 }
 
-void Controller::updatePosition(float dTheta, float omega) {
-  Serial.println(position(0));
-  Serial.println(position(1));
+
+void Controller::updatePosition() {
 
 
-  if (stepperL->currentPosition() != lastPosL) {
-    position(0) += steps_to_mm(stepperL->currentPosition() - lastPosL) * cos(theta) / 2;
-    position(1) += steps_to_mm(stepperL->currentPosition() - lastPosL) * sin(theta) / 2;
-  }
-  if (stepperR->currentPosition() != lastPosR) {
-    position(0) += steps_to_mm(stepperR->currentPosition() - lastPosR) * cos(theta) / 2;
-    position(1) += steps_to_mm(stepperR->currentPosition() - lastPosR) * sin(theta) / 2;
-  }
+  //Serial.println(position(0));
+  //Serial.println(position(1));
+  float dL = stepperL->currentPosition() - lastPosL;
+  float dR = stepperR->currentPosition() - lastPosR;
   lastPosL = stepperL->currentPosition();
   lastPosR = stepperR->currentPosition();
+  float dS = (dL + dR) / 2;
+  Serial.println(dL);
+  Serial.println(dR);
+  Serial.println(dS);
+  position(0) += steps_to_mm(dS) * cos(thetaMid);
+  position(1) += steps_to_mm(dS) * sin(thetaMid);
   /*
   Serial.print("x: ");
   Serial.println(position(0));
@@ -288,8 +293,8 @@ void Controller::moveX(float dist) {
 
     //Lock steppers
     steppersEngaged_mtx->lock();
-    lastPosL = stepperL->currentPosition();
-    lastPosR = stepperR->currentPosition();
+    //lastPosL = stepperL->currentPosition();
+    //lastPosR = stepperR->currentPosition();
 
     //set accel and vel
     stepperL->setAcceleration(maxA);
@@ -297,10 +302,10 @@ void Controller::moveX(float dist) {
     stepperL->setMaxSpeed(maxV);
     stepperR->setMaxSpeed(maxV * RIGHT_OFF);
 
-    lastPosL = 0;
-    lastPosR = 0;
-    stepperL->setCurrentPosition(0);
-    stepperR->setCurrentPosition(0);
+    //lastPosL = 0;
+    //lastPosR = 0;
+    //stepperL->setCurrentPosition(0);
+    //stepperR->setCurrentPosition(0);
 
     //set wheel positions
     stepperL->move(steps);
@@ -328,8 +333,8 @@ void Controller::turnTheta(float targetTheta, bool SLOW) {
 
   //lock steppers
   steppersEngaged_mtx->lock();
-  lastPosL = stepperL->currentPosition();
-  lastPosR = stepperR->currentPosition();
+  //lastPosL = stepperL->currentPosition();
+  //lastPosR = stepperR->currentPosition();
   //set accel and vel
   stepperL->setAcceleration(maxAlpha);
   stepperR->setAcceleration(maxAlpha * RIGHT_OFF);
@@ -371,6 +376,8 @@ void Controller::doArc(int arcType) {
     stepperL->move(mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
     position(0) += 250 * sqrt(2) * cos(theta - (PI / 4));
     position(1) += 250 * sqrt(2) * sin(theta - (PI / 4));
+    lastPosL += mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV);
+    lastPosR += mm_to_steps(innerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV);
   }
   if (arcType == 2) {
     stepperR->setAcceleration(mm_to_steps(MAX_ACC_ARC, WHEEL_RADIUS, STEPS_PER_REV));
@@ -381,6 +388,8 @@ void Controller::doArc(int arcType) {
     stepperR->move(mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV));
     position(0) += 250 * sqrt(2) * cos(theta + (PI / 4));
     position(1) += 250 * sqrt(2) * sin(theta + (PI / 4));
+    lastPosL += mm_to_steps(innerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV);
+    lastPosR += mm_to_steps(outerR * PI / 2, WHEEL_RADIUS, STEPS_PER_REV);
   }
 
   steppersEngaged_mtx->unlock();

@@ -59,7 +59,7 @@ void Robot::update() {
         }
       }
       robotController->update();
-      robotController->updatePosition(0, 0);
+      robotController->updatePosition();
       break;
 
     //deciding turns
@@ -81,7 +81,7 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, true);
 
         //robotSimplePursuit->nextPoint();
-        state = 7;
+        state = 2;
       } else if (robotSimplePursuit->turnType() == 2) {
         deltaTheta = -PI / 2;
         Serial.print(" deltaTheta: ");
@@ -98,7 +98,7 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, false);
 
         //robotSimplePursuit->nextPoint();
-        state = 7;
+        state = 2;
       } else if (robotSimplePursuit->turnType() == 3) {
         deltaTheta = PI / 2;
         Serial.print(" deltaTheta: ");
@@ -115,7 +115,7 @@ void Robot::update() {
         robotController->turnTheta(robotController->theta + deltaTheta, false);
 
         //robotSimplePursuit->nextPoint();
-        state = 7;
+        state = 2;
       } else if (robotSimplePursuit->arcType() != 0) {
 
         robotController->doArc(robotSimplePursuit->arcType());
@@ -166,7 +166,7 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
-        robotController->updatePosition(0, 0);
+        robotController->updatePosition();
       }
       break;
 
@@ -194,7 +194,7 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
-        robotController->updatePosition(0, 0);
+        robotController->updatePosition();
       }
       break;
     case 7:

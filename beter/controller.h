@@ -40,6 +40,7 @@ private:
   float lastAccY;
   float lastPosR;
   float lastPosL;
+  float omega;
 public:
   Vector2f position;
   Vector2f imu_position;
@@ -49,6 +50,7 @@ public:
   bool lastPoint;
   float vel_x;
   float vel_y;
+  float thetaMid;
 
 
   Controller(
@@ -65,7 +67,7 @@ public:
 
   void update();
   void updateTheta();
-  void updatePosition(float dTheta, float omega);
+  void updatePosition();
 
   void moveX(float dist);
   void turnTheta(float targetTheta, bool SLOW);
