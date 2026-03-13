@@ -22,7 +22,7 @@
 //Robot physical dimensions
 //in mm
 #define WHEEL_RADIUS 40.6
-#define TRACK_WIDTH 151.1  //146.2 is real 151 under, 151.2 over steer
+#define TRACK_WIDTH 149  //146.2 is real 151 under, 151.2 over steer
 #define DIST_TO_DOWEL 90.90431
 #define IMU_X 24.21250
 #define IMU_Y -1.75000
@@ -37,15 +37,18 @@ MAX ANGULAR ACCELERATION: 15
 MAX ANGULAR VELOCITY: 15 unsure need to do a full 180 turn test
 */
 //in mm/s
-#define MAX_ACC 2000
+#define MAX_ACC 2500
 #define MAX_VEL 1000
 
-#define MAX_ACC_ARC 2000
+#define MAX_ACC_ARC 2500
 #define MAX_VEL_ARC 1000
 
 //in rad/sec
 #define MAX_ANG_ACC 20
 #define MAX_ANG_VEL 20
+
+#define BOTTLE_ANG_ACC 10
+#define BOTTLE_ANG_VEL 10
 
 #define SLOW_ANG_ACC 3
 #define SLOW_ANG_VEL 3

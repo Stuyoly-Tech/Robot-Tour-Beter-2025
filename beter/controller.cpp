@@ -55,6 +55,7 @@ void Controller::init() {
   vel_y = 0;
   thetaMid = 0;
   lastPoint = false;
+  bottle = false;
   stepperL->setCurrentPosition(0);
   stepperR->setCurrentPosition(0);
 }
@@ -210,7 +211,7 @@ void Controller::updateTheta() {
     //Serial.printf("OMEGA: %f\n", omega);
 
     float dTheta = omega * (dt);
-    thetaMid = theta + dTheta / 2;
+    //thetaMid = theta + dTheta / 2;
     theta += dTheta;
 
     //Rescale theta
@@ -237,8 +238,8 @@ void Controller::updatePosition() {
   Serial.println(dL);
   Serial.println(dR);
   Serial.println(dS);
-  position(0) += steps_to_mm(dS) * cos(thetaMid);
-  position(1) += steps_to_mm(dS) * sin(thetaMid);
+  position(0) += steps_to_mm(dS) * cos(theta);
+  position(1) += steps_to_mm(dS) * sin(theta);
   /*
   Serial.print("x: ");
   Serial.println(position(0));
@@ -326,6 +327,10 @@ void Controller::moveX(float dist) {
 void Controller::turnTheta(float targetTheta, bool SLOW) {
   int maxOmega = mm_to_steps(MAX_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
   int maxAlpha = mm_to_steps(MAX_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  if(bottle){
+    maxOmega = mm_to_steps(BOTTLE_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+    maxAlpha = mm_to_steps(BOTTLE_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  }
   if (SLOW) {
     maxOmega = mm_to_steps(SLOW_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
     maxAlpha = mm_to_steps(SLOW_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
@@ -398,6 +403,10 @@ void Controller::doArc(int arcType) {
 
 
   state = 1;
+}
+
+void Controller::toggleBottle(){
+  bottle = !bottle;
 }
 
 void Controller::setVx(float newVx) {

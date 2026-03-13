@@ -73,6 +73,13 @@ int simplePursuit::arcType() {
   return output;
 }
 
+bool simplePursuit::bottleToggle(){
+  if(path[currentGoalPointIndex](0) == -1){
+    return true;
+  }
+  return false;
+}
+
 
 float simplePursuit::getCurrentGoalPointDist(Vector2f p) {
   return getDist(path[currentGoalPointIndex], p);

@@ -65,6 +65,10 @@ void Robot::update() {
     //deciding turns
     case 3:
       robotSimplePursuit->nextPoint();
+      if (robotSimplePursuit->bottleToggle()) {
+        robotController->toggleBottle();
+        robotSimplePursuit->nextPoint();
+      }
       if (robotSimplePursuit->turnType() == 1) {
         deltaTheta = PI;
         Serial.print(" deltaTheta: ");
@@ -206,6 +210,7 @@ void Robot::update() {
         }
       }
       robotController->update();
+      robotController->updatePosition();
       break;
     default:
       state = 0;

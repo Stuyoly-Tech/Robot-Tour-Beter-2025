@@ -40,6 +40,7 @@ public:
 
   int turnType();
   int arcType();
+  bool bottleToggle();
 
   //get index of path
   int getPathIndexCount();

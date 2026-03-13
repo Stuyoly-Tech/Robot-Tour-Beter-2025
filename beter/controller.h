@@ -41,6 +41,8 @@ private:
   float lastPosR;
   float lastPosL;
   float omega;
+
+  bool bottle;
 public:
   Vector2f position;
   Vector2f imu_position;
@@ -72,6 +74,7 @@ public:
   void moveX(float dist);
   void turnTheta(float targetTheta, bool SLOW);
   void doArc(int arcType);
+  void toggleBottle();
 
   void setVx(float newVx);
 

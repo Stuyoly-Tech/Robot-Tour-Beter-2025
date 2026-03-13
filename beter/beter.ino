@@ -518,6 +518,9 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
       case 'X':
         pX = 7676;
         break;
+      case 'b':
+        pX = -1;
+        break;
       case 'A':
         pX = 0;
         break;
@@ -564,6 +567,9 @@ boolean LOADPATHFROMSD(fs::FS &fs) {
         break;
       case 'L':
         pY = 67676767;
+        break;
+      case 'b':
+        pY = -1;
         break;
       case '1':
         pY = 0;
@@ -624,7 +630,7 @@ void testTurns() {
   ROBOTCONTROLLER.init();
   ROBOT.init(1);
   digitalWrite(STEP_EN, LOW);
-  ROBOTCONTROLLER.turnTheta((-PI/2), true);
+  ROBOTCONTROLLER.turnTheta((-PI / 2), true);
   while (ROBOTCONTROLLER.state != 0) {
     ROBOTCONTROLLER.update();
   }
