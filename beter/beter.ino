@@ -137,7 +137,7 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
 
   digitalWrite(STEP_EN, HIGH);
-  digitalWrite(SPREAD, LOW);
+  digitalWrite(SPREAD, HIGH);
 
   //pinMode(SD_CS, OUTPUT);
   //digitalWrite(SD_CS, HIGH);s

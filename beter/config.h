@@ -40,7 +40,7 @@ MAX ANGULAR VELOCITY: 15 unsure need to do a full 180 turn test
 #define MAX_ACC 2500
 #define MAX_VEL 1000
 
-#define MAX_ACC_ARC 2500
+#define MAX_ACC_ARC 2250
 #define MAX_VEL_ARC 1000
 
 //in rad/sec

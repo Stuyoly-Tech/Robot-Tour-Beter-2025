@@ -221,6 +221,7 @@ void Controller::updateTheta() {
     while (theta < -PI) {
       theta += TWO_PI;
     }
+    updatePosition();
   }
 }
 
@@ -327,6 +328,9 @@ void Controller::moveX(float dist) {
 void Controller::turnTheta(float targetTheta, bool SLOW) {
   int maxOmega = mm_to_steps(MAX_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
   int maxAlpha = mm_to_steps(MAX_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
+  if(!bottle){
+    return;
+  }
   if(bottle){
     maxOmega = mm_to_steps(BOTTLE_ANG_VEL * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);
     maxAlpha = mm_to_steps(BOTTLE_ANG_ACC * WHEEL_RADIUS, WHEEL_RADIUS, STEPS_PER_REV);

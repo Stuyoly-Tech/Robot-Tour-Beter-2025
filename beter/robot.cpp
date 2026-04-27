@@ -59,7 +59,7 @@ void Robot::update() {
         }
       }
       robotController->update();
-      robotController->updatePosition();
+      //robotController->updatePosition();
       break;
 
     //deciding turns
@@ -170,7 +170,7 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
-        robotController->updatePosition();
+        //robotController->updatePosition();
       }
       break;
 
@@ -198,7 +198,7 @@ void Robot::update() {
       } else {
         //("UPDATE");
         robotController->update();
-        robotController->updatePosition();
+        //robotController->updatePosition();
       }
       break;
     case 7:
@@ -210,7 +210,7 @@ void Robot::update() {
         }
       }
       robotController->update();
-      robotController->updatePosition();
+      //robotController->updatePosition();
       break;
     default:
       state = 0;
